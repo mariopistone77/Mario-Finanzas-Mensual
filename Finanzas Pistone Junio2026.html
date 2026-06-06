@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PISTONE FINANZAS — Dashboard Personal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg0:#0d0f12; --bg1:#13161b; --bg2:#1a1e25; --bg3:#222630;
+  --bg4:#2a2f3a; --bg5:#323844;
+  --text0:#f0ede6; --text1:#c8c4bc; --text2:#8a8680; --text3:#5a5650;
+  --border:#2e3340; --border2:#3d4455;
+  --green:#4ade80; --green-d:#166534; --green-bg:rgba(74,222,128,0.08); --green-border:rgba(74,222,128,0.25);
+  --red:#f87171; --red-d:#7f1d1d; --red-bg:rgba(248,113,113,0.08); --red-border:rgba(248,113,113,0.25);
+  --blue:#60a5fa; --blue-d:#1e3a5f; --blue-bg:rgba(96,165,250,0.08); --blue-border:rgba(96,165,250,0.25);
+  --amber:#fbbf24; --amber-d:#78350f; --amber-bg:rgba(251,191,36,0.08); --amber-border:rgba(251,191,36,0.25);
+  --purple:#a78bfa; --purple-bg:rgba(167,139,250,0.08);
+  --accent:#4ade80;
+  --r:8px; --r-lg:14px; --r-xl:20px;
+  --font-head:'Syne',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg0);color:var(--text0);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-200px;left:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(74,222,128,0.04) 0%,transparent 70%);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;bottom:-200px;right:-200px;width:500px;height:500px;background:radial-gradient(circle,rgba(96,165,250,0.04) 0%,transparent 70%);pointer-events:none;z-index:0}
+
+/* TOPBAR */
+.topbar{background:var(--bg1);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:0;position:sticky;top:0;z-index:200;height:56px}
+.brand{font-family:var(--font-head);font-size:15px;font-weight:800;letter-spacing:.12em;color:var(--text0);text-transform:uppercase;padding-right:24px;border-right:1px solid var(--border);margin-right:16px;white-space:nowrap}
+.brand span{color:var(--accent)}
+.month-selector{display:flex;gap:6px;align-items:center;padding-right:20px;border-right:1px solid var(--border);margin-right:16px}
+.month-pill{font-family:var(--font-head);font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .2s;letter-spacing:.04em}
+.month-pill.on{background:var(--accent);border-color:var(--accent);color:#000;font-weight:700}
+.month-pill:hover:not(.on){border-color:var(--text2);color:var(--text1)}
+.year-sel{font-size:11px;padding:5px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);color:var(--text1);cursor:pointer}
+.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tb-btn{font-family:var(--font-body);font-size:12px;padding:7px 14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg2);color:var(--text1);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s}
+.tb-btn:hover{background:var(--bg3);border-color:var(--border2);color:var(--text0)}
+.tb-btn.primary{background:var(--accent);border-color:var(--accent);color:#000;font-weight:500}
+.tb-btn.primary:hover{background:#22d05a;border-color:#22d05a}
+.theme-btn{width:34px;height:34px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg2);color:var(--text1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px}
+
+/* TABS */
+.nav-tabs{background:var(--bg1);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:0;position:sticky;top:56px;z-index:190;overflow-x:auto;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{font-family:var(--font-head);font-size:11px;font-weight:600;letter-spacing:.06em;padding:14px 18px;border:none;background:transparent;color:var(--text2);cursor:pointer;white-space:nowrap;position:relative;transition:color .2s;text-transform:uppercase}
+.nav-tab::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--accent);transform:scaleX(0);transition:transform .2s}
+.nav-tab.on{color:var(--text0)}
+.nav-tab.on::after{transform:scaleX(1)}
+.nav-tab:hover:not(.on){color:var(--text1)}
+
+/* CONTAINER */
+.container{max-width:960px;margin:0 auto;padding:28px 20px;position:relative;z-index:1}
+
+/* TAB CONTENT */
+.tc{display:none}.tc.on{display:block}
+
+/* SECTION TITLE */
+.sec{font-family:var(--font-head);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin:28px 0 10px;display:flex;align-items:center;gap:8px}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* METRIC GRID */
+.mg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:4px}
+.mc{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r-lg);padding:1rem 1.1rem;position:relative;overflow:hidden;transition:border-color .2s}
+.mc:hover{border-color:var(--border2)}
+.mc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:2px 2px 0 0}
+.mc.g::before{background:var(--green)}.mc.r::before{background:var(--red)}.mc.b::before{background:var(--blue)}.mc.a::before{background:var(--amber)}.mc.p::before{background:var(--purple)}
+.ml{font-size:11px;color:var(--text2);margin-bottom:5px;font-weight:400}
+.mv{font-size:20px;font-weight:600;font-family:var(--font-head);letter-spacing:-.02em}
+.mv.g{color:var(--green)}.mv.r{color:var(--red)}.mv.b{color:var(--blue)}.mv.a{color:var(--amber)}.mv.p{color:var(--purple)}
+.ms{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* CARD */
+.card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.1rem 1.25rem;margin-bottom:12px}
+.card-title{font-family:var(--font-head);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+
+/* ROWS */
+.row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.row:last-child{border-bottom:none}
+.rl{color:var(--text2);flex:1;min-width:0;display:flex;align-items:center;gap:6px}
+.rv{font-weight:500;color:var(--text0);white-space:nowrap}
+.rv.pos{color:var(--green)}.rv.neg{color:var(--red)}.rv.info{color:var(--blue)}.rv.warn{color:var(--amber)}
+.sep{height:1px;background:var(--border);margin:.75rem 0}
+
+/* BADGES */
+.bdg{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;letter-spacing:.03em;white-space:nowrap}
+.bd{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.bw{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.bi{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.bg2{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.bn{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.bp{background:var(--purple-bg);color:var(--purple);border:1px solid rgba(167,139,250,.25)}
+
+/* ALERTS */
+.al{padding:12px 16px;border-radius:var(--r);font-size:13px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start;line-height:1.6}
+.al-g{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.al-b{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.al-w{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.al-r{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.al span{color:var(--text1)}
+
+/* TARJETA CARDS */
+.tcrd{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r-lg);padding:.9rem 1.1rem;margin-bottom:8px;transition:border-color .2s}
+.tcrd:hover{border-color:var(--border2)}
+.tcrd-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:6px}
+.tcrd-name{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text0)}
+.tcrd-bank{font-size:11px;color:var(--text3);margin-top:1px}
+.tcrd-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.tcrd-lbl{font-size:10px;color:var(--text3);margin-bottom:2px;letter-spacing:.03em}
+.tcrd-val{font-weight:600;font-size:13px;font-family:var(--font-head)}
+.tcrd-val.r{color:var(--red)}.tcrd-val.g{color:var(--green)}.tcrd-val.w{color:var(--amber)}
+.tcrd-note{margin-top:8px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);padding-top:6px}
+
+/* STEPS */
+.step{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.step:last-child{border-bottom:none}
+.snum{width:28px;height:28px;border-radius:50%;font-size:11px;font-weight:700;font-family:var(--font-head);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.snum.done{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.snum.warn{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)}
+.snum.info{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.snum.red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+.step-date{font-size:11px;font-weight:600;color:var(--text3);margin-bottom:3px;letter-spacing:.04em;text-transform:uppercase}
+.step-title{font-size:13px;font-weight:600;margin-bottom:5px;color:var(--text0);font-family:var(--font-head)}
+.step-body{font-size:12px;color:var(--text2);line-height:1.7}
+.tag-grp{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+
+/* CASHFLOW TABLE */
+.cf-wrap{overflow-x:auto}
+.cf-table{width:100%;border-collapse:collapse;font-size:12px}
+.cf-table th{font-size:10px;font-weight:700;font-family:var(--font-head);color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left}
+.cf-table td{padding:7px 10px;border-bottom:1px solid var(--border)}
+.cf-table tr:last-child td{border-bottom:none}
+.cf-table tr:hover td{background:var(--bg2)}
+
+/* REGISTRO FORM */
+.af{display:grid;grid-template-columns:1fr 130px 120px 90px;gap:8px;align-items:end;margin-bottom:10px}
+.af input,.af select{font-size:13px;height:38px;padding:0 12px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text0);font-family:var(--font-body)}
+.af input:focus,.af select:focus{outline:none;border-color:var(--accent)}
+.af select option{background:var(--bg2);color:var(--text0)}
+.af button{height:38px;font-size:12px;padding:0 16px;border-radius:var(--r);border:1px solid var(--accent);background:var(--green-bg);color:var(--green);cursor:pointer;font-family:var(--font-head);font-weight:700;letter-spacing:.04em}
+.af button:hover{background:var(--accent);color:#000}
+.er{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.dbt{font-size:11px;color:var(--text3);cursor:pointer;background:none;border:none;padding:3px 8px;border-radius:4px}
+.dbt:hover{background:var(--red-bg);color:var(--red)}
+
+/* CHART WRAP */
+.chart-wrap{position:relative;width:100%;height:240px;margin:14px 0}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.legend-dot{width:10px;height:10px;border-radius:2px}
+
+/* TRACKING */
+.tr-item{display:grid;grid-template-columns:34px 1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.tr-item:last-child{border-bottom:none}
+.tr-check{width:26px;height:26px;border-radius:7px;border:1.5px solid var(--border2);background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;transition:all .15s}
+.tr-check.done{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.tr-check.skip{background:var(--amber-bg);border-color:var(--amber);color:var(--amber)}
+.tr-name{font-size:13px;color:var(--text0);font-weight:500}
+.tr-name.done-text{text-decoration:line-through;color:var(--text3);font-weight:400}
+.tr-date{font-size:10px;color:var(--text3);letter-spacing:.03em;text-transform:uppercase}
+.tr-amount{font-size:13px;font-weight:600;white-space:nowrap;text-align:right;font-family:var(--font-head)}
+.tr-amount.ing{color:var(--green)}.tr-amount.eg{color:var(--red)}.tr-amount.done-amt{color:var(--text3)}
+.tr-btn{font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:var(--font-head);font-weight:600;letter-spacing:.04em}
+.tr-btn:hover{background:var(--bg3)}
+
+/* COMPARE */
+.compare-row{display:grid;grid-template-columns:1fr 110px 110px 90px;gap:6px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px}
+.compare-row:last-child{border-bottom:none}
+.compare-hdr{font-size:10px;font-weight:700;font-family:var(--font-head);color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.dev-pos{color:var(--green);font-weight:600}.dev-neg{color:var(--red);font-weight:600}.dev-zero{color:var(--text3)}
+.prog-wrap{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:6px 0}
+.prog-fill{height:100%;border-radius:3px;transition:width .5s ease}
+
+/* CATEGORY CHART */
+.cat-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cat-bar-label{font-size:12px;color:var(--text1);min-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat-bar-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.cat-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.cat-bar-value{font-size:12px;font-weight:600;font-family:var(--font-head);min-width:90px;text-align:right;color:var(--text0)}
+.cat-bar-pct{font-size:10px;color:var(--text3);min-width:32px;text-align:right}
+
+/* MONTHLY COMPARISON */
+.month-comp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+.month-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:1rem;cursor:pointer;transition:all .2s}
+.month-card:hover,.month-card.on{border-color:var(--accent);background:var(--bg3)}
+.month-card-title{font-family:var(--font-head);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
+.month-card-val{font-family:var(--font-head);font-size:18px;font-weight:700}
+.month-card-sub{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* UPLOAD ZONE */
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--r-lg);padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg1)}
+.upload-zone:hover{border-color:var(--accent);background:var(--bg2)}
+.upload-zone-icon{font-size:32px;margin-bottom:10px}
+.upload-zone-title{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--text1);margin-bottom:4px}
+.upload-zone-sub{font-size:12px;color:var(--text3)}
+.upload-zone input{display:none}
+
+/* INV ROWS */
+.inv-row{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.inv-row:last-child{border-bottom:none}
+.inv-rank{font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--bg4);min-width:32px}
+.inv-rend{font-family:var(--font-head);font-size:14px;font-weight:700;min-width:80px;text-align:right;white-space:nowrap}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(12px);transition:opacity .4s ease,transform .4s ease}
+.reveal.visible{opacity:1;transform:none}
+
+/* ALERTA CRITICA */
+.alert-critical{background:linear-gradient(135deg,rgba(248,113,113,.12),rgba(251,191,36,.08));border:1px solid rgba(248,113,113,.3);border-radius:var(--r-lg);padding:16px 18px;margin-bottom:16px}
+.alert-critical-title{font-family:var(--font-head);font-size:13px;font-weight:800;color:var(--red);letter-spacing:.04em;margin-bottom:6px}
+.alert-critical-body{font-size:12px;color:var(--text1);line-height:1.7}
+
+/* LIGHT THEME */
+[data-theme="light"]{
+  --bg0:#f4f3ef; --bg1:#ffffff; --bg2:#f0ede8; --bg3:#e8e5e0; --bg4:#ddd9d3; --bg5:#d4d0ca;
+  --text0:#1a1916; --text1:#3d3b36; --text2:#6b6860; --text3:#9a9790;
+  --border:rgba(0,0,0,.1); --border2:rgba(0,0,0,.18);
+  --green:#1a7a3a; --green-bg:rgba(26,122,58,.07); --green-border:rgba(26,122,58,.2);
+  --red:#b02020; --red-bg:rgba(176,32,32,.07); --red-border:rgba(176,32,32,.2);
+  --blue:#1a52a0; --blue-bg:rgba(26,82,160,.07); --blue-border:rgba(26,82,160,.2);
+  --amber:#a05c10; --amber-bg:rgba(160,92,16,.07); --amber-border:rgba(160,92,16,.2);
+  --purple:#6c4fc2; --purple-bg:rgba(108,79,194,.07);
+}
+
+@media(max-width:640px){
+  .topbar{padding:0 14px;height:50px;flex-wrap:wrap;height:auto;padding-top:10px;padding-bottom:10px}
+  .brand{font-size:12px;padding-right:12px;margin-right:10px}
+  .month-selector{flex-wrap:wrap;gap:4px}
+  .month-pill{font-size:10px;padding:4px 9px}
+  .container{padding:16px 14px}
+  .mg{grid-template-columns:1fr 1fr}
+  .tcrd-grid{grid-template-columns:1fr 1fr}
+  .af{grid-template-columns:1fr 1fr}
+  .tr-item{grid-template-columns:28px 1fr auto}
+  .compare-row{grid-template-columns:1fr 80px 80px 60px}
+  .nav-tab{font-size:10px;padding:12px 12px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">PISTONE<span>.</span>FIN</div>
+  <div class="month-selector">
+    <select class="year-sel" id="yr-sel" onchange="switchYear()">
+      <option value="2026">2026</option>
+    </select>
+    <button class="month-pill on" data-m="6" onclick="switchMonth(6,this)">JUN</button>
+    <button class="month-pill" data-m="7" onclick="switchMonth(7,this)">JUL</button>
+    <button class="month-pill" data-m="8" onclick="switchMonth(8,this)">AGO</button>
+  </div>
+  <div class="topbar-right">
+    <label class="tb-btn" style="cursor:pointer" title="Subir resúmenes del próximo mes">
+      &#128196; subir resúmenes
+      <input type="file" id="upload-file" accept=".pdf,.jpg,.png" multiple style="display:none" onchange="handleUpload(this)">
+    </label>
+    <button class="tb-btn primary" onclick="exportExcel()">&#8659; excel</button>
+    <button class="theme-btn" onclick="toggleTheme()">&#9680;</button>
+  </div>
+</div>
+
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <button class="nav-tab on" onclick="showTab('resumen')">Resumen</button>
+  <button class="nav-tab" onclick="showTab('cashflow')">Cashflow</button>
+  <button class="nav-tab" onclick="showTab('tarjetas')">Tarjetas</button>
+  <button class="nav-tab" onclick="showTab('gastos')">Gastos</button>
+  <button class="nav-tab" onclick="showTab('estrategia')">Estrategia</button>
+  <button class="nav-tab" onclick="showTab('inversiones')">Dónde poner la plata</button>
+  <button class="nav-tab" onclick="showTab('tracking')">Seguimiento</button>
+  <button class="nav-tab" onclick="showTab('registro')">Registrar</button>
+  <button class="nav-tab" onclick="showTab('historico')">Histórico</button>
+</div>
+
+<div class="container">
+
+<!-- RESUMEN -->
+<div id="tab-resumen" class="tc on">
+
+  <div class="alert-critical reveal">
+    <div class="alert-critical-title">⚠ ALERTA DE LIQUIDEZ — 5 DE JUNIO</div>
+    <div class="alert-critical-body">
+      Las comisiones de mayo (<strong>~$5M</strong>) se retrasan para esta tarde del <strong>5/6</strong>. El ingreso extra de $500k se corre al <strong>10/6</strong>. Esto genera una brecha crítica hoy: tenés que pagar <strong>$13,3M en tarjetas</strong> con solo <strong>$2,6M disponibles</strong>. Plan de acción actualizado abajo.
+    </div>
+  </div>
+
+  <div class="sec">ingresos junio 2026</div>
+  <div class="mg">
+    <div class="mc b reveal"><div class="ml">Salario disponible</div><div class="mv b">$2.645.758</div><div class="ms">caja Santander — disponible ahora</div></div>
+    <div class="mc a reveal"><div class="ml">Comisiones mayo</div><div class="mv a">~$5.000.000</div><div class="ms">⚠ ingresan hoy tarde 5/6</div></div>
+    <div class="mc b reveal"><div class="ml">Cheques 10/6</div><div class="mv b">$2.233.000</div><div class="ms">Amaranto $743k + Rivero $1.49M</div></div>
+    <div class="mc b reveal"><div class="ml">Extra 10/6</div><div class="mv b">$500.000</div><div class="ms">⚠ corrido al 10/6 (no 12/6)</div></div>
+    <div class="mc b reveal"><div class="ml">Cheques 20/6</div><div class="mv b">$2.233.000</div><div class="ms">Amaranto + Rivero 2/3</div></div>
+    <div class="mc b reveal"><div class="ml">Extra + Cheques 29-30/6</div><div class="mv b">$2.922.236</div><div class="ms">$700k extra + $741k + $1.48M</div></div>
+  </div>
+  <div class="card reveal" style="margin-top:10px">
+    <div class="row"><span class="rl">total ingresos junio</span><span class="rv pos" style="font-size:17px;font-family:var(--font-head)">$15.533.994</span></div>
+  </div>
+
+  <div class="sec">patrimonio financiero</div>
+  <div class="mg">
+    <div class="mc reveal"><div class="ml">Fondo Santander $</div><div class="mv">$1.344.455</div><div class="ms">~6%/mes — disponible T+0</div></div>
+    <div class="mc reveal"><div class="ml">Fondo FIMA Galicia $</div><div class="mv">$1.973.996</div><div class="ms">~6%/mes — disponible T+0</div></div>
+    <div class="mc p reveal"><div class="ml">FIMA Galicia USD</div><div class="mv p">USD 8.623</div><div class="ms">≈ $12,2M al TC oficial</div></div>
+    <div class="mc g reveal"><div class="ml">Amex Santander</div><div class="mv g">+$240.289</div><div class="ms">saldo acreedor a tu favor</div></div>
+  </div>
+
+  <div class="sec">compromisos junio</div>
+  <div class="mg">
+    <div class="mc r reveal"><div class="ml">Total tarjetas (neto)</div><div class="mv r">$13.319.663</div><div class="ms">8 tarjetas — vence 5/6</div></div>
+    <div class="mc a reveal"><div class="ml">Gastos fijos</div><div class="mv a">$2.200.800</div><div class="ms">sueldo + expensas + deporte</div></div>
+    <div class="mc a reveal"><div class="ml">Ya pagado</div><div class="mv a">$600.000</div><div class="ms">odontólogo Alexandra 3/6</div></div>
+    <div class="mc g reveal"><div class="ml">Resultado neto est.</div><div class="mv g" id="res-neto">+$313.194</div><div class="ms">ingresos − todo</div></div>
+  </div>
+
+  <div class="sec">balance del mes</div>
+  <div class="card reveal">
+    <div class="row"><span class="rl">total ingresos junio</span><span class="rv pos">+$15.533.994</span></div>
+    <div class="row"><span class="rl">tarjetas neto a pagar</span><span class="rv neg">−$13.319.663</span></div>
+    <div class="row"><span class="rl">gastos fijos (sueldo + expensas + deporte)</span><span class="rv neg">−$2.200.800</span></div>
+    <div class="row"><span class="rl">odontólogo Alexandra (pagado 3/6)</span><span class="rv neg">−$600.000</span></div>
+    <div class="sep"></div>
+    <div class="row"><span class="rl" style="font-weight:600;font-family:var(--font-head)">resultado neto estimado</span><span class="rv pos" style="font-size:17px;font-family:var(--font-head)" id="balance-neto">+$313.194</span></div>
+  </div>
+
+</div>
+
+<!-- CASHFLOW -->
+<div id="tab-cashflow" class="tc">
+  <div class="sec">cashflow día a día — junio 2026 <span style="color:var(--amber);font-size:10px;font-weight:600;margin-left:8px">⚠ RECALCULADO 5/6</span></div>
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>saldo positivo</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>saldo negativo</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--blue);height:2px;width:16px"></span>línea cero</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>uso de fondos/USD</span>
+  </div>
+  <div class="chart-wrap"><canvas id="cfChart"></canvas></div>
+  <div class="card">
+    <div class="cf-wrap"><table class="cf-table"><thead><tr><th>fecha</th><th>concepto</th><th style="text-align:right">ingreso</th><th style="text-align:right">egreso</th><th style="text-align:right">saldo acum.</th><th>fuente</th></tr></thead><tbody id="cf-body"></tbody></table></div>
+  </div>
+</div>
+
+<!-- TARJETAS -->
+<div id="tab-tarjetas" class="tc">
+  <div class="sec">tarjetas — mario pistone <span class="bdg bd" style="margin-left:4px">prioridad alta</span></div>
+
+  <div class="tcrd reveal" style="border-left:3px solid var(--red)">
+    <div class="tcrd-hdr"><div><div class="tcrd-name">Visa Galicia Signature</div><div class="tcrd-bank">Banco Galicia — tarjeta 4253 (Mario)</div></div><span class="bdg bd">TNA 85.65% — pagar 1°</span></div>
+    <div class="tcrd-grid"><div><div class="tcrd-lbl">saldo actual</div><div class="tcrd-val r">$2.766.499</div></div><div><div class="tcrd-lbl">pago mínimo</div><div class="tcrd-val w">$626.400</div></div><div><div class="tcrd-lbl">vencimiento</div><div class="tcrd-val">5/6/2026</div></div></div>
+    <div class="tcrd-note">Cuotas: Jun $527.586 · Jul $527.586 · Ago $455.620 · Sep $455.620 · Oct $455.620</div>
+  </div>
+
+  <div class="tcrd reveal" style="border-left:3px solid var(--red)">
+    <div class="tcrd-hdr"><div><div class="tcrd-name">Amex Galicia Eminent</div><div class="tcrd-bank">Banco Galicia — tarjetas 3844/3851/6191 (Mario)</div></div><span class="bdg bd">TNA 85.65% — pagar 2°</span></div>
+    <div class="tcrd-grid"><div><div class="tcrd-lbl">saldo actual</div><div class="tcrd-val r">$1.686.409</div></div><div><div class="tcrd-lbl">pago mínimo</div><div class="tcrd-val w">$228.420</div></div><div><div class="tcrd-lbl">vencimiento</div><div class="tcrd-val">5/6/2026</div></div></div>
+    <div class="tcrd-note">USD 139,00 — pagar en dólares para evitar impuesto RG5617 (30%)</div>
+  </div>
+
+  <div class="tcrd reveal" style="border-left:3px solid var(--blue)">
+    <div class="tcrd-hdr"><div><div class="tcrd-name">Visa Santander Black</div><div class="tcrd-bank">Santander Río — cuenta 1246106680 (Mario)</div></div><span class="bdg bi">TNA 81.80%</span></div>
+    <div class="tcrd-grid"><div><div class="tcrd-lbl">saldo actual</div><div class="tcrd-val r">$1.125.899</div></div><div><div class="tcrd-lbl">pago mínimo</div><div class="tcrd-val w">$555.120</div></div><div><div class="tcrd-lbl">vencimiento</div><div class="tcrd-val">5/6/2026</div></div></div>
+    <div class="tcrd-note">Plan V dic-25: $29.311/mes x 6 meses</div>
+  </div>
+
+  <div class="tcrd reveal" style="border-left:3px solid var(--amber)">
+    <div class="tcrd-hdr"><div><div class="tcrd-name">Visa BBVA Signature</div><div class="tcrd-bank">BBVA Argentina — cuenta 0900669820 (Mario)</div></div><span class="bdg bw">TNA 72.35%</span></div>
+    <div class="tcrd-grid"><div><div class="tcrd-lbl">saldo actual</div><div class="tcrd-val r">$2.249.206</div></div><div><div class="tcrd-lbl">pago mínimo</div><div class="tcrd-val w">$212.750</div></div><div><div class="tcrd-lbl">vencimiento</div><div class="tcrd-val">5/6/2026</div></div></div>
+    <div class="tcrd-note">Cuotas: Jun $23.333 · Jul $23.333</div>
+  </div>
+
+  <div class="tcrd reveal" style="border-left:3px solid var(--amber)">
+    <div class="tcrd-hdr"><div><div class="tcrd-name">Visa Macro Signature</div><div class="tcrd-bank">Banco Macro — tarjeta 3043 (Mario)</div></div><span class="bdg bw">TNA 72.30%</span></div>
+    <div class="tcrd-grid"><div><div class="tcrd-lbl">saldo actual</div><div class="tcrd-val r">$527.923</div></div><div><div class="tcrd-lbl">pago mínimo</div><div class="tcrd-val w">$88.638</div></div><div><div class="tcrd-lbl">vencimiento</div><div class="tcrd-val">5/6/2026</div></div></div>
+    <div class="tcrd-note">Cuotas pendientes Jun $113.689</div>
+  </div>
+
+  <div class="tcrd reveal" style="border-left:3px solid var(--green)">
+    <div class="tcrd-hdr"><div><div class="tcrd-name">Amex Santander Black</div><div class="tcrd-bank">Santander Río — cuenta 1246132247 (Mario)</div></div><span class="bdg bg2">✓ saldo a favor</span></div>
+    <div class="tcrd-grid"><div><div class="tcrd-lbl">saldo actual</div><div class="tcrd-val g">+$240.289</div></div><div><div class="tcrd-lbl">pago mínimo</div><div class="tcrd-val g">$0 — no pagar</div></div><div><div class="tcrd-lbl">vencimiento</div><div class="tcrd-val">8/6/2026</div></div></div>
+    <div class="tcrd-note">El banco te debe $240.289. Solo consumo: Somos River $20.500 + sellos $246. Se acredita automáticamente.</div>
+  </div>
+
+  <div class="sec" style="margin-top:20px">tarjetas — alexandra caraballo hipfel</div>
+
+  <div class="tcrd reveal" style="border-left:3px solid var(--red)">
+    <div class="tcrd-hdr"><div><div class="tcrd-name">Cencosud Mastercard</div><div class="tcrd-bank">Cencosud — tarjeta 7312 (Alexandra)</div></div><span class="bdg bd">TNA 86.49% — pagar 3°</span></div>
+    <div class="tcrd-grid"><div><div class="tcrd-lbl">saldo actual</div><div class="tcrd-val r">$1.522.061</div></div><div><div class="tcrd-lbl">pago mínimo</div><div class="tcrd-val w">$531.070</div></div><div><div class="tcrd-lbl">vencimiento</div><div class="tcrd-val">5/6/2026</div></div></div>
+    <div class="tcrd-note">Cuotas: Jun $182.365 · Jul $74.559 · Ago $17.933</div>
+  </div>
+
+  <div class="tcrd reveal" style="border-left:3px solid var(--amber)">
+    <div class="tcrd-hdr"><div><div class="tcrd-name">Master BBVA Black</div><div class="tcrd-bank">BBVA Argentina — cuenta 1261332556 (Alexandra)</div></div><span class="bdg bw">TNA 72.35% — objetivo julio</span></div>
+    <div class="tcrd-grid"><div><div class="tcrd-lbl">saldo actual</div><div class="tcrd-val r">$3.681.955</div></div><div><div class="tcrd-lbl">pago mínimo</div><div class="tcrd-val w">$305.607</div></div><div><div class="tcrd-lbl">vencimiento</div><div class="tcrd-val">5/6/2026</div></div></div>
+    <div class="tcrd-note">Cuotas: Jun $679.413 · Jul $664.413 · Ago $238.884 · Sep $145.531 · Oct $145.531</div>
+  </div>
+
+  <div class="sep"></div>
+  <div class="card reveal">
+    <div class="row"><span class="rl">total saldo deudor (7 tarjetas)</span><span class="rv neg">$13.559.952</span></div>
+    <div class="row"><span class="rl">saldo acreedor Amex Santander</span><span class="rv pos">+$240.289</span></div>
+    <div class="row" style="font-weight:600"><span class="rl" style="font-family:var(--font-head)">neto a pagar</span><span class="rv neg" style="font-size:16px;font-family:var(--font-head)">$13.319.663</span></div>
+  </div>
+</div>
+
+<!-- GASTOS POR CATEGORIA -->
+<div id="tab-gastos" class="tc">
+
+  <div class="sec">filtro titular</div>
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <button class="month-pill on" data-owner="all" onclick="filterOwner('all',this)">Todos</button>
+    <button class="month-pill" data-owner="mario" onclick="filterOwner('mario',this)">Mario</button>
+    <button class="month-pill" data-owner="alex" onclick="filterOwner('alex',this)">Alexandra</button>
+  </div>
+
+  <div class="sec">gastos por categoría — mayo 2026</div>
+  <div class="card reveal" id="cat-bars-container"></div>
+
+  <div class="sec">detalle mario pistone</div>
+  <div class="card reveal" id="gastos-mario"></div>
+
+  <div class="sec">detalle alexandra caraballo hipfel</div>
+  <div class="card reveal" id="gastos-alex"></div>
+
+  <div class="sec">distribución visual</div>
+  <div class="chart-wrap" style="height:280px"><canvas id="catPieChart"></canvas></div>
+</div>
+
+<!-- ESTRATEGIA -->
+<div id="tab-estrategia" class="tc">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+    <div id="estrategia-status-badge" class="bdg bi">plan base — sin ajustes manuales</div>
+    <button class="tb-btn primary" onclick="recalcEstrategia()" style="font-size:12px;padding:8px 16px">
+      ↻ recalcular con mis datos
+    </button>
+  </div>
+  <div class="alert-critical reveal" id="estrategia-alert-box">
+    <div class="alert-critical-title">🔴 SITUACIÓN CRÍTICA — PLAN RECALCULADO</div>
+    <div class="alert-critical-body">
+      Comisiones retrasadas a <strong>hoy tarde (5/6)</strong>. Sin ese ingreso, disponés solo de <strong>$2,6M</strong> + fondos FIMA ($3,3M) vs tarjetas que vencen hoy ($13,3M). <strong>Recomendación: vender parte del fondo USD como puente temporal.</strong>
+    </div>
+  </div>
+
+  <div class="sec">plan de pagos — recalculado</div>
+  <div class="card reveal">
+
+    <div class="step">
+      <div class="snum red">!</div>
+      <div style="flex:1">
+        <div class="step-date">hoy mañana — 5 jun (URGENTE — antes de 10am)</div>
+        <div class="step-title">rescatar fondos FIMA para cubrir los pagos del día</div>
+        <div class="step-body">Antes de que venza hoy, rescatá inmediatamente:<br>
+        • FIMA Galicia pesos: rescatar $3.973.996 completo (T+0 — acredita en minutos)<br>
+        • Fondo Santander pesos: rescatar $1.344.455 completo (T+0)<br>
+        Total disponible: $2.645.758 (salario) + $3.973.996 + $1.344.455 = <strong>$7.964.209</strong></div>
+        <div class="tag-grp"><span class="bdg bd">rescatar FIMA antes de las 10am</span><span class="bdg bw">T+0 — acreditación inmediata</span></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="snum red">2</div>
+      <div style="flex:1">
+        <div class="step-date">5 jun — antes de las 21:59hs</div>
+        <div class="step-title">pagar Visa Galicia + Amex Galicia + Cencosud (las más caras)</div>
+        <div class="step-body">Con los $7,96M disponibles pagar primero las de mayor tasa (85-86%):<br>
+        Visa Galicia $2.766.499 + Amex Galicia $1.686.409 + Cencosud $1.522.061 = <strong>$5.974.969</strong><br>
+        Saldo libre después: $1.989.240</div>
+        <div class="tag-grp"><span class="bdg bd">−$5.974.969</span><span class="bdg bg2">libre: $1.989.240</span></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="snum red">3</div>
+      <div style="flex:1">
+        <div class="step-date">5 jun — mismo momento</div>
+        <div class="step-title">pagar Visa Santander + Visa BBVA + Visa Macro con lo que queda</div>
+        <div class="step-body">Con $1.989.240 disponibles:<br>
+        Visa Santander $1.125.899 + Visa BBVA $2.249.206 + Visa Macro $527.923 = $3.903.028<br>
+        Déficit: $1.913.788. <strong>Cubrir con venta parcial del fondo USD.</strong><br><br>
+        💡 <strong>Sobre el fondo USD:</strong> Vender USD 1.350 (≈ $1.917.000 al TC ~$1.420) es suficiente para cubrir el gap. Mantener USD 7.273 intactos. Esta venta es temporal — cuando ingresen las comisiones recomprás los USD vendidos.<br>
+        Alternativa: pagar el <em>mínimo</em> de Visa BBVA ($212.750) + Macro ($88.638) hoy y cancelar el saldo completo el 5/6 cuando lleguen las comisiones — pero arriesgás que el débito automático se active.</div>
+        <div class="tag-grp"><span class="bdg bd">−$3.903.028</span><span class="bdg bp">vender USD 1.350 como puente</span></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="snum warn">4</div>
+      <div style="flex:1">
+        <div class="step-date">5 jun — tarde (cuando ingresen comisiones ~$5M)</div>
+        <div class="step-title">recomprar USD vendidos + pagar Master BBVA + reconstituir fondos</div>
+        <div class="step-body">Con las comisiones ($5M):<br>
+        1. Pagar Master BBVA $3.681.955 (la de mayor saldo pendiente)<br>
+        2. Recomprar USD 1.350 para reponer el fondo — costo: ~$1.917.000<br>
+        3. Sobrante: $5M − $3.681.955 − $1.917.000 = <strong>−$598.955</strong><br>
+        Cubrir con los $1.989.240 que quedaron libres → sobrante final: $1.390.285 → al FIMA inmediatamente.</div>
+        <div class="tag-grp"><span class="bdg bw">−$3.681.955 Master BBVA</span><span class="bdg bp">recomprar USD 1.350</span><span class="bdg bg2">$1.39M al FIMA</span></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="snum info">5</div>
+      <div style="flex:1">
+        <div class="step-date">10 jun — cobro cheques $2.233.000 + extra $500.000</div>
+        <div class="step-title">gastos fijos del mes + reconstituir fondos</div>
+        <div class="step-body">Ingresan $2.733.000 total ($743k Amaranto + $1.490k Rivero + $500k extra).<br>
+        Pagar: sueldo Verónica $951.800 + expensas $424.000 + fútbol/gym $245.000 = $1.620.800<br>
+        Sobrante: $1.112.200 → al fondo FIMA Galicia inmediatamente.</div>
+        <div class="tag-grp"><span class="bdg bg2">sobrante $1.112.200 al FIMA</span></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="snum info">6</div>
+      <div style="flex:1">
+        <div class="step-date">20 jun — cheques $2.233.000</div>
+        <div class="step-title">sumar al fondo — acumular para julio</div>
+        <div class="step-body">Ingresan $2.233.000 (Amaranto + Rivero 2/3). Más el extra de $700k cuando llegue. Todo al FIMA Galicia. Para fin de junio deberías tener ~$4,7M en fondos pesos como base para julio.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="snum info">7</div>
+      <div style="flex:1">
+        <div class="step-date">29-30 jun — últimos cheques $2.222.236</div>
+        <div class="step-title">dejar en fondo hasta vencimiento julio (13/7)</div>
+        <div class="step-body">Rivero $1.481.236 (29/6) + Amaranto $741.000 (30/6). Dejar en FIMA hasta el 13/7. El dinero rinde ~$42.000 adicionales en esos 13 días.</div>
+        <div class="tag-grp"><span class="bdg bi">rinde ~$42k antes de usarse</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="al al-b reveal" style="margin-top:12px">
+    ℹ <span>Objetivo julio: con Galicia + Cencosud pagadas al 100%, el saldo total cae de $13,3M a ~$7,5M. Prioridad: atacar el saldo del Master BBVA ($3,68M) que genera ~$221k de intereses por mes si solo se paga el mínimo.</span>
+  </div>
+
+  <!-- DYNAMIC RECALC SECTION -->
+  <div id="estrategia-recalc-section" style="display:none;margin-top:20px">
+    <div class="sec">estrategia recalculada con tus datos <span class="bdg bg2" style="margin-left:4px">actualizado</span></div>
+    <div class="card" id="estrategia-recalc-steps"></div>
+    <div class="card" style="margin-top:10px" id="estrategia-recalc-summary"></div>
+  </div>
+
+</div>
+
+<!-- INVERSIONES -->
+<div id="tab-inversiones" class="tc">
+  <div class="sec">dónde poner el dinero entre cobros</div>
+  <div class="card reveal">
+    <div class="inv-row">
+      <div class="inv-rank" style="color:var(--green)">01</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text0)">Fondo FIMA Galicia pesos — <span class="bdg bg2">recomendado principal</span></div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7">~70-75% TNA (6% mensual), T+0 inmediato, sin riesgo de mercado. Para plata que necesitás en 1-30 días. Ideal para parquear entre cobros y pagos.</div>
+      </div>
+      <div class="inv-rend" style="color:var(--green)">~6%<span style="font-size:10px">/mes</span></div>
+    </div>
+    <div class="inv-row">
+      <div class="inv-rank" style="color:var(--green)">02</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text0)">Fondo Santander pesos</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7">Mismo rendimiento que el FIMA. Ideal si el dinero ya está en Santander — evitás transferirlo. Regla: depositarlo apenas ingresa, rescatarlo 48hs antes del vencimiento de la tarjeta.</div>
+      </div>
+      <div class="inv-rend" style="color:var(--green)">~6%<span style="font-size:10px">/mes</span></div>
+    </div>
+    <div class="inv-row">
+      <div class="inv-rank" style="color:var(--amber)">03</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text0)">COCOS / BALANZ — Lecaps <span class="bdg bw">excedente &gt;$1M</span></div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7">8-10% mensual (Lecap S30J5 o S29G5 son las más líquidas hoy). Solo para plata que no vas a necesitar en menos de 2 semanas. Liquidez T+1 a T+2.</div>
+      </div>
+      <div class="inv-rend" style="color:var(--amber)">8-10%<span style="font-size:10px">/mes</span></div>
+    </div>
+    <div class="inv-row">
+      <div class="inv-rank" style="color:var(--purple)">04</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text0)">Fondo USD — uso estratégico como puente</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7">Con crawling peg al 1% mensual, los pesos rinden más que los dólares. El fondo USD es reserva de valor. Usarlo solo como puente de liquidez de cortísimo plazo (como hoy), recomprando inmediatamente. Cuando el saldo total de tarjetas baje de $5M, retomar compra mensual de USD.</div>
+      </div>
+      <div class="inv-rend" style="color:var(--purple)">reserva</div>
+    </div>
+  </div>
+
+  <div class="sec">cuánto genera cada peso mientras espera</div>
+  <div class="card reveal">
+    <div class="row"><span class="rl">$1.390.285 en FIMA (5/6 al 10/6 = 5 días)</span><span class="rv pos">+$13.900 aprox.</span></div>
+    <div class="row"><span class="rl">$1.112.200 en FIMA (10/6 al 13/7 = 33 días)</span><span class="rv pos">+$73.400 aprox.</span></div>
+    <div class="row"><span class="rl">$2.233.000 en FIMA (20/6 al 13/7 = 23 días)</span><span class="rv pos">+$102.000 aprox.</span></div>
+    <div class="row"><span class="rl">$2.222.236 en FIMA (30/6 al 13/7 = 13 días)</span><span class="rv pos">+$57.500 aprox.</span></div>
+    <div class="sep"></div>
+    <div class="row"><span class="rl" style="font-weight:600;font-family:var(--font-head)">renta extra total por fondear bien</span><span class="rv pos" style="font-size:16px;font-family:var(--font-head)">+$246.800 aprox.</span></div>
+  </div>
+  <div class="al al-g reveal">✦ <span>$246.800 de renta extra solo por no dejar el dinero en caja de ahorro. Es el costo de oportunidad de cada día que el dinero no está en un fondo.</span></div>
+</div>
+
+<!-- TRACKING -->
+<div id="tab-tracking" class="tc">
+  <div class="sec">progreso de ejecución</div>
+  <div class="mg" id="tr-summary-grid">
+    <div class="mc g"><div class="ml">cobros confirmados</div><div class="mv g" id="tr-ing-ok">$0</div></div>
+    <div class="mc r"><div class="ml">pagos confirmados</div><div class="mv r" id="tr-eg-ok">$0</div></div>
+    <div class="mc b"><div class="ml">saldo real acumulado</div><div class="mv b" id="tr-saldo-real">$0</div></div>
+    <div class="mc a"><div class="ml">desvío vs plan</div><div class="mv a" id="tr-desvio">$0</div></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin:8px 0 4px">
+    <span id="tr-prog-lbl">0 de 21 ítems</span><span id="tr-prog-pct">0%</span>
+  </div>
+  <div class="prog-wrap"><div class="prog-fill" id="tr-prog" style="width:0%;background:var(--green)"></div></div>
+
+  <div class="sec" style="margin-top:20px">📅 3 jun — ya pagado</div>
+  <div class="card" id="tr-list-pre"></div>
+  <div class="sec">📅 5 jun — hoy (URGENTE)</div>
+  <div class="card" id="tr-list-5jun"></div>
+  <div class="sec">📅 10 jun — cobros + gastos fijos</div>
+  <div class="card" id="tr-list-10jun"></div>
+  <div class="sec">📅 20 jun en adelante</div>
+  <div class="card" id="tr-list-late"></div>
+
+  <div class="sec">comparativa plan vs real</div>
+  <div class="card">
+    <div class="compare-row"><span class="compare-hdr">concepto</span><span class="compare-hdr" style="text-align:right">plan</span><span class="compare-hdr" style="text-align:right">real</span><span class="compare-hdr" style="text-align:right">desvío</span></div>
+    <div id="tr-compare-rows"></div>
+    <div class="sep"></div>
+    <div class="compare-row" style="font-weight:600;font-family:var(--font-head)"><span>TOTAL NETO</span><span style="text-align:right" id="cmp-plan-total">$0</span><span style="text-align:right" id="cmp-real-total">$0</span><span style="text-align:right" id="cmp-dev-total">$0</span></div>
+  </div>
+
+  <div class="sec">cashflow real vs proyectado</div>
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span>plan</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>real</span>
+  </div>
+  <div class="chart-wrap"><canvas id="compareChart"></canvas></div>
+</div>
+
+<!-- REGISTRO -->
+<div id="tab-registro" class="tc">
+  <div class="sec">agregar ingreso</div>
+  <div class="card">
+    <div class="af">
+      <input type="text" id="i-desc" placeholder="descripción del ingreso"/>
+      <select id="i-cat"><option value="salario">salario</option><option value="comision">comisión</option><option value="cheque">cheque diferido</option><option value="extra">extra</option><option value="otro">otro</option></select>
+      <input type="number" id="i-monto" placeholder="monto $"/>
+      <button onclick="addItem('i')">+ agregar</button>
+    </div>
+    <div id="i-list"></div>
+  </div>
+  <div class="sec">agregar egreso / gasto</div>
+  <div class="card">
+    <div class="af">
+      <input type="text" id="e-desc" placeholder="descripción del gasto"/>
+      <select id="e-cat"><option value="tarjeta">tarjeta</option><option value="alimentos">alimentos</option><option value="salud">salud</option><option value="educacion">educación</option><option value="deporte">deporte</option><option value="hogar">hogar</option><option value="combustible">combustible</option><option value="servicios">servicios</option><option value="indumentaria">indumentaria</option><option value="otros">otros</option></select>
+      <input type="number" id="e-monto" placeholder="monto $"/>
+      <button onclick="addItem('e')">+ agregar</button>
+    </div>
+    <div id="e-list"></div>
+  </div>
+  <div class="sec">balance actualizado en tiempo real</div>
+  <div class="card">
+    <div class="row"><span class="rl">ingresos base junio</span><span class="rv pos">+$15.533.994</span></div>
+    <div class="row"><span class="rl">ingresos extra agregados</span><span class="rv pos" id="tot-i-extra">+$0</span></div>
+    <div class="row"><span class="rl">compromisos base</span><span class="rv neg">−$16.120.463</span></div>
+    <div class="row"><span class="rl">gastos extra agregados</span><span class="rv neg" id="tot-e-extra">−$0</span></div>
+    <div class="sep"></div>
+    <div class="row"><span class="rl" style="font-weight:600;font-family:var(--font-head)">saldo neto actualizado</span><span class="rv pos" id="bal-neto" style="font-size:16px;font-family:var(--font-head)">+$313.194 est.</span></div>
+  </div>
+  <div class="sec">impacto en la estrategia</div>
+  <div class="card" id="estrategia-impacto" style="display:none">
+    <div style="font-family:var(--font-head);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+      <span>estrategia recalculada</span>
+      <span class="bdg bi" id="last-update-lbl"></span>
+    </div>
+    <div id="estrategia-recalc-content"></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:8px">
+    <button class="tb-btn primary" onclick="recalcEstrategia()" style="flex:1;justify-content:center;font-size:13px;padding:10px 16px">
+      ↻ recalcular estrategia
+    </button>
+    <button class="tb-btn primary" onclick="exportExcel()" style="flex:1;justify-content:center">⬇ exportar excel</button>
+  </div>
+</div>
+
+<!-- HISTORICO -->
+<div id="tab-historico" class="tc">
+  <div class="sec">comparativa mensual — 2026</div>
+  <div id="historico-cards" class="month-comp-grid"></div>
+
+  <div class="sec">evolución de gastos por categoría</div>
+  <div class="chart-wrap" style="height:260px"><canvas id="histCatChart"></canvas></div>
+
+  <div class="sec">subir resúmenes del próximo mes</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--text1);margin-bottom:12px;line-height:1.6">Subí los PDF o imágenes de los resúmenes del próximo mes. Una vez cargados podré analizar y comparar automáticamente con los meses anteriores.</div>
+    <label class="upload-zone">
+      <div class="upload-zone-icon">📄</div>
+      <div class="upload-zone-title">Arrastrar o tocar para subir resúmenes</div>
+      <div class="upload-zone-sub">PDF, JPG, PNG — múltiples archivos permitidos</div>
+      <input type="file" accept=".pdf,.jpg,.png" multiple onchange="handleUpload(this)">
+    </label>
+    <div id="upload-list" style="margin-top:12px"></div>
+  </div>
+
+  <div class="sec">evolución saldo tarjetas</div>
+  <div class="chart-wrap"><canvas id="histTarjetasChart"></canvas></div>
+
+  <div class="sec">desvío ingreso vs gasto mensual</div>
+  <div class="chart-wrap"><canvas id="histBalanceChart"></canvas></div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ====================================================
+// PERSISTENCIA — definidas primero para Safari iOS
+// ====================================================
+var LS_KEY = 'pistone_fin_jun2026_v1';
+
+function showSaveToast(msg, duration){
+  duration = duration || 2000;
+  try {
+    var toast = document.getElementById('save-toast');
+    if(!toast){
+      toast = document.createElement('div');
+      toast.id = 'save-toast';
+      toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#222630;border:1px solid rgba(74,222,128,0.25);color:#4ade80;font-family:Syne,sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;padding:10px 16px;border-radius:20px;z-index:9999;transition:opacity .3s;pointer-events:none;text-transform:uppercase';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.opacity = '1';
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(function(){ toast.style.opacity='0'; }, duration);
+  } catch(e){}
+}
+
+function saveState(){
+  try {
+    var state = {
+      iList: iList,
+      eList: eList,
+      extraItems: extraItems,
+      trItems: TR_ITEMS.map(function(item){
+        return {id:item.id, done:item.done, skip:item.skip, realAmt:item.realAmt};
+      }),
+      savedAt: new Date().toISOString()
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+    showSaveToast('guardado ✓');
+  } catch(e){
+    // localStorage no disponible — falla silenciosamente
+  }
+}
+
+// ====================================================
+var isDark = false;
+function toggleTheme(){
+  isDark=!isDark;
+  document.documentElement.setAttribute('data-theme',isDark?'light':'');
+}
+
+var currentMonth=6, currentYear=2026;
+
+function switchMonth(m,el){
+  currentMonth=m;
+  document.querySelectorAll('.month-pill').forEach(function(b){b.classList.remove('on')});
+  el.classList.add('on');
+  updateForMonth();
+}
+function switchYear(){}
+function updateForMonth(){ /* future multi-month logic */ }
+
+function showTab(id){
+  document.querySelectorAll('.tc').forEach(function(t){t.classList.remove('on')});
+  document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('on')});
+  document.getElementById('tab-'+id).classList.add('on');
+  event.target.classList.add('on');
+  if(id==='cashflow') setTimeout(renderCF,50);
+  if(id==='tracking'){renderTracking();setTimeout(renderCompareChart,80);}
+  if(id==='gastos') renderGastos();
+  if(id==='historico') renderHistorico();
+}
+
+var fmt=function(n){return '$'+Math.round(n).toLocaleString('es-AR');};
+var fmtK=function(n){return n>=1000000?'$'+(n/1000000).toFixed(1)+'M':'$'+(n/1000).toFixed(0)+'k';};
+
+// ====================================================
+// CASHFLOW DATA — RECALCULADO 5/6
+// ====================================================
+var BASE_CF=[
+  {d:'3 jun', desc:'Odontólogo Alexandra (pagado)',      tipo:'eg',monto:600000,  fuente:'efectivo'},
+  {d:'5 jun', desc:'Rescate FIMA Galicia + Santander',   tipo:'ing',monto:5318451, fuente:'fondos'},
+  {d:'5 jun', desc:'Salario disponible (Santander)',      tipo:'ing',monto:2645758, fuente:'salario'},
+  {d:'5 jun', desc:'Pago Visa Galicia Signature',         tipo:'eg',monto:2766499, fuente:'tarjeta'},
+  {d:'5 jun', desc:'Pago Amex Galicia Eminent',           tipo:'eg',monto:1686409, fuente:'tarjeta'},
+  {d:'5 jun', desc:'Pago Cencosud Mastercard',            tipo:'eg',monto:1522061, fuente:'tarjeta'},
+  {d:'5 jun', desc:'Venta USD 1.350 como puente',         tipo:'ing',monto:1917000, fuente:'usd'},
+  {d:'5 jun', desc:'Pago Visa Santander Black',           tipo:'eg',monto:1125899, fuente:'tarjeta'},
+  {d:'5 jun', desc:'Pago Visa BBVA Signature',            tipo:'eg',monto:2249206, fuente:'tarjeta'},
+  {d:'5 jun', desc:'Pago Visa Macro Signature',           tipo:'eg',monto:527923,  fuente:'tarjeta'},
+  {d:'5 jun', desc:'Comisiones mayo ingresadas',          tipo:'ing',monto:5000000, fuente:'comision'},
+  {d:'5 jun', desc:'Pago Master BBVA Black',              tipo:'eg',monto:3681955, fuente:'tarjeta'},
+  {d:'5 jun', desc:'Recompra USD 1.350',                  tipo:'eg',monto:1917000, fuente:'usd'},
+  {d:'10 jun', desc:'Cobro cheque Amaranto (1/3)',         tipo:'ing',monto:743000,  fuente:'cheque'},
+  {d:'10 jun', desc:'Cobro cheque Rivero (1/3)',           tipo:'ing',monto:1490000, fuente:'cheque'},
+  {d:'10 jun', desc:'Cobro ingreso extra',                 tipo:'ing',monto:500000,  fuente:'extra'},
+  {d:'10 jun', desc:'Sueldo Verónica Olguín',             tipo:'eg',monto:951800,  fuente:'personal'},
+  {d:'10 jun', desc:'Expensas Lares de Canning',          tipo:'eg',monto:424000,  fuente:'expensas'},
+  {d:'10 jun', desc:'Fútbol Ramiro + Gym',                tipo:'eg',monto:245000,  fuente:'deporte'},
+  {d:'20 jun', desc:'Cobro cheque Amaranto (2/3)',         tipo:'ing',monto:743000,  fuente:'cheque'},
+  {d:'20 jun', desc:'Cobro cheque Rivero (2/3)',           tipo:'ing',monto:1490000, fuente:'cheque'},
+  {d:'TBD jun',desc:'Ingreso extra adicional',            tipo:'ing',monto:700000,  fuente:'extra'},
+  {d:'29 jun', desc:'Cobro cheque Rivero (3/3)',           tipo:'ing',monto:1481236, fuente:'cheque'},
+  {d:'30 jun', desc:'Cobro cheque Amaranto (3/3)',         tipo:'ing',monto:741000,  fuente:'cheque'}
+];
+
+var extraItems=[];
+var cfChartInst=null;
+
+function renderCF(){
+  var rows=BASE_CF.concat(extraItems);
+  var acum=0, tbody='', labels=[], saldos=[], colors=[];
+  rows.forEach(function(r){
+    acum+=(r.tipo==='ing'?r.monto:-r.monto);
+    var clrA=acum>=0?'var(--green)':'var(--red)';
+    var fuenteColor={'fondos':'var(--purple)','usd':'var(--purple)','comision':'var(--blue)','cheque':'var(--blue)','salario':'var(--blue)','tarjeta':'var(--red)','personal':'var(--amber)','expensas':'var(--amber)','deporte':'var(--amber)','extra':'var(--green)','efectivo':'var(--amber)'}[r.fuente]||'var(--text2)';
+    tbody+='<tr><td style="color:var(--text2);white-space:nowrap">'+r.d+'</td><td>'+r.desc+'</td><td style="text-align:right;color:var(--green)">'+(r.tipo==='ing'?fmt(r.monto):'')+'</td><td style="text-align:right;color:var(--red)">'+(r.tipo==='eg'?'−'+fmt(r.monto):'')+'</td><td style="text-align:right;font-weight:600;color:'+clrA+'">'+fmt(acum)+'</td><td><span class="bdg" style="background:'+fuenteColor+'15;color:'+fuenteColor+';border-color:'+fuenteColor+'40">'+r.fuente+'</span></td></tr>';
+    labels.push(r.d.replace(' jun',''));
+    saldos.push(Math.round(acum));
+    colors.push(acum>=0?'rgba(74,222,128,0.8)':'rgba(248,113,113,0.8)');
+  });
+  document.getElementById('cf-body').innerHTML=tbody;
+  if(cfChartInst) cfChartInst.destroy();
+  cfChartInst=new Chart(document.getElementById('cfChart'),{
+    type:'line',
+    data:{labels:labels,datasets:[{label:'Saldo acumulado',data:saldos,borderColor:'rgba(74,222,128,0.9)',backgroundColor:'rgba(74,222,128,0.06)',pointBackgroundColor:saldos.map(function(v){return v>=0?'#4ade80':'#f87171';}),pointRadius:5,tension:0.3,fill:true},{label:'Cero',data:saldos.map(function(){return 0;}),borderColor:'rgba(96,165,250,0.4)',borderWidth:1,borderDash:[5,5],pointRadius:0,fill:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},maxRotation:45,autoSkip:false},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{callback:function(v){return fmtK(v);},font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+}
+
+// ====================================================
+// GASTOS POR CATEGORIA
+// ====================================================
+var GASTOS_MARIO=[
+  {cat:'educacion',desc:'Colegio Grilli (Ramiro)',monto:1184571,vital:true},
+  {cat:'seguros',desc:'Seguros Allianz (x2)',monto:275468,vital:true},
+  {cat:'servicios',desc:'Claro débito automático',monto:73843,vital:true},
+  {cat:'servicios',desc:'CVSA Accesos (peaje)',monto:5200,vital:true},
+  {cat:'servicios',desc:'Directv e-commerce',monto:52270,vital:true},
+  {cat:'transporte',desc:'Neumáticos (cuotas)',monto:273547,vital:true},
+  {cat:'viajes',desc:'Aerolineas (viaje)',monto:543578,vital:false},
+  {cat:'viajes',desc:'Turismocity',monto:50640,vital:false},
+  {cat:'alimentos',desc:'Coto supermercado',monto:310577,vital:true},
+  {cat:'alimentos',desc:'Burger King + Pasta Ross',monto:221450,vital:false},
+  {cat:'alimentos',desc:'Outlet Bebidas + Taba',monto:87085,vital:false},
+  {cat:'deporte',desc:'Morres (x2)',monto:218450,vital:false},
+  {cat:'deporte',desc:'Sportline Las Toscas',monto:46666,vital:false},
+  {cat:'deporte',desc:'Somos River',monto:10420,vital:false},
+  {cat:'deporte',desc:'Club del Manzano (x2)',monto:252969,vital:false},
+  {cat:'suscripciones',desc:'Starlink (última cuota 6/6)',monto:66501,vital:false},
+  {cat:'entretenimiento',desc:'Netflix + Spotify',monto:6554,vital:false},
+  {cat:'hogar',desc:'Punto Vision + Vivero',monto:95300,vital:false},
+  {cat:'compras',desc:'Bueno y Bonito',monto:106500,vital:false},
+  {cat:'compras',desc:'La Pulga + BonPrix',monto:186700,vital:false},
+  {cat:'alimentos',desc:'Apple.com (servicios)',monto:3915,vital:false}
+];
+var GASTOS_ALEX=[
+  {cat:'alimentos',desc:'Easy supermercado (cuotas)',monto:385364,vital:true},
+  {cat:'salud',desc:'Farmacias (x3)',monto:118789,vital:true},
+  {cat:'educacion',desc:'Chicos Uniformes (cuotas)',monto:17933,vital:true},
+  {cat:'indumentaria',desc:'Canelujoyas',monto:200000,vital:false},
+  {cat:'indumentaria',desc:'Malaika (cuotas)',monto:41500,vital:false},
+  {cat:'indumentaria',desc:'Selu (cuotas)',monto:56000,vital:false},
+  {cat:'indumentaria',desc:'Miuk Heyewear (lentes)',monto:54480,vital:false},
+  {cat:'indumentaria',desc:'Prune + Chula Home Deco',monto:82400,vital:false},
+  {cat:'hogar',desc:'Arbi Home',monto:104000,vital:false},
+  {cat:'hogar',desc:'Mix Ofertas (x3)',monto:150400,vital:false},
+  {cat:'alimentos',desc:'Pedidos Ya + Le Garden (delivery)',monto:122039,vital:false},
+  {cat:'combustible',desc:'Shell combustible',monto:233110,vital:true},
+  {cat:'compras',desc:'Merpago varios (Alexandra)',monto:630000,vital:false}
+];
+
+var CAT_COLORS={educacion:'#60a5fa',alimentos:'#4ade80',deporte:'#a78bfa',viajes:'#fb923c',salud:'#f472b6',indumentaria:'#f87171',hogar:'#94a3b8',combustible:'#fbbf24',servicios:'#34d399',seguros:'#6ee7b7',suscripciones:'#818cf8',entretenimiento:'#c084fc',compras:'#a3e635',transporte:'#38bdf8'};
+var currentOwner='all';
+var catPieInst=null;
+
+function filterOwner(o,el){
+  currentOwner=o;
+  document.querySelectorAll('[data-owner]').forEach(function(b){b.classList.remove('on')});
+  el.classList.add('on');
+  renderGastos();
+}
+
+function renderGastos(){
+  var marioData=currentOwner!=='alex'?GASTOS_MARIO:[];
+  var alexData=currentOwner!=='mario'?GASTOS_ALEX:[];
+  var allData=marioData.concat(alexData);
+
+  // Category totals
+  var cats={};
+  allData.forEach(function(g){cats[g.cat]=(cats[g.cat]||0)+g.monto;});
+  var sortedCats=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a];});
+  var total=allData.reduce(function(a,g){return a+g.monto;},0);
+  var maxCat=cats[sortedCats[0]]||1;
+
+  var barsHtml=sortedCats.map(function(cat){
+    var pct=Math.round(cats[cat]/total*100);
+    var barW=Math.round(cats[cat]/maxCat*100);
+    var c=CAT_COLORS[cat]||'var(--blue)';
+    return '<div class="cat-bar-row"><div class="cat-bar-label" style="color:var(--text1)">'+cat+'</div><div class="cat-bar-track"><div class="cat-bar-fill" style="width:'+barW+'%;background:'+c+'"></div></div><div class="cat-bar-value">'+fmt(cats[cat])+'</div><div class="cat-bar-pct">'+pct+'%</div></div>';
+  }).join('');
+  document.getElementById('cat-bars-container').innerHTML=barsHtml||'<div style="color:var(--text3);font-size:13px;text-align:center;padding:12px">Sin datos para mostrar</div>';
+
+  function renderDetail(data,containerId){
+    var html=data.map(function(g){
+      var c=CAT_COLORS[g.cat]||'var(--blue)';
+      return '<div class="row"><span class="rl"><span class="bdg" style="background:'+c+'20;color:'+c+';border-color:'+c+'40">'+g.cat+'</span> '+g.desc+' '+(g.vital?'<span class="bdg bg2">vital</span>':'<span class="bdg bn">opcional</span>')+'</span><span class="rv neg">'+fmt(g.monto)+'</span></div>';
+    }).join('');
+    document.getElementById(containerId).innerHTML=html||'<div style="color:var(--text3);font-size:13px;padding:8px">Sin datos</div>';
+  }
+
+  if(currentOwner!=='alex') renderDetail(GASTOS_MARIO,'gastos-mario');
+  else document.getElementById('gastos-mario').innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px">Filtrado — solo Alexandra</div>';
+  if(currentOwner!=='mario') renderDetail(GASTOS_ALEX,'gastos-alex');
+  else document.getElementById('gastos-alex').innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px">Filtrado — solo Mario</div>';
+
+  // Pie chart
+  if(catPieInst) catPieInst.destroy();
+  catPieInst=new Chart(document.getElementById('catPieChart'),{
+    type:'doughnut',
+    data:{labels:sortedCats,datasets:[{data:sortedCats.map(function(c){return cats[c];}),backgroundColor:sortedCats.map(function(c){return (CAT_COLORS[c]||'#60a5fa')+'cc';}),borderColor:'var(--bg1)',borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8a8680',font:{size:11},padding:12,usePointStyle:true}}}}
+  });
+}
+
+// ====================================================
+// TRACKING
+// ====================================================
+var TR_ITEMS=[
+  {id:'t01',fecha:'3 jun',grupo:'pre',   desc:'Odontólogo Alexandra',        tipo:'eg',plan:600000,  realAmt:600000,done:true, skip:false},
+  {id:'t02',fecha:'5 jun',grupo:'5jun',  desc:'Rescate FIMA + Santander',    tipo:'ing',plan:5318451,realAmt:0,done:false,skip:false},
+  {id:'t03',fecha:'5 jun',grupo:'5jun',  desc:'Cobro salario (Santander)',   tipo:'ing',plan:2645758,realAmt:0,done:false,skip:false},
+  {id:'t04',fecha:'5 jun',grupo:'5jun',  desc:'Venta USD 1.350 (puente)',    tipo:'ing',plan:1917000,realAmt:0,done:false,skip:false},
+  {id:'t05',fecha:'5 jun',grupo:'5jun',  desc:'Pagar Visa Galicia',          tipo:'eg',plan:2766499,realAmt:0,done:false,skip:false},
+  {id:'t06',fecha:'5 jun',grupo:'5jun',  desc:'Pagar Amex Galicia',          tipo:'eg',plan:1686409,realAmt:0,done:false,skip:false},
+  {id:'t07',fecha:'5 jun',grupo:'5jun',  desc:'Pagar Cencosud',              tipo:'eg',plan:1522061,realAmt:0,done:false,skip:false},
+  {id:'t08',fecha:'5 jun',grupo:'5jun',  desc:'Pagar Visa Santander',        tipo:'eg',plan:1125899,realAmt:0,done:false,skip:false},
+  {id:'t09',fecha:'5 jun',grupo:'5jun',  desc:'Pagar Visa BBVA',             tipo:'eg',plan:2249206,realAmt:0,done:false,skip:false},
+  {id:'t10',fecha:'5 jun',grupo:'5jun',  desc:'Pagar Visa Macro',            tipo:'eg',plan:527923, realAmt:0,done:false,skip:false},
+  {id:'t11',fecha:'5 jun tarde',grupo:'5jun',desc:'Cobro comisiones mayo',   tipo:'ing',plan:5000000,realAmt:0,done:false,skip:false},
+  {id:'t12',fecha:'5 jun tarde',grupo:'5jun',desc:'Pagar Master BBVA',       tipo:'eg',plan:3681955,realAmt:0,done:false,skip:false},
+  {id:'t13',fecha:'5 jun tarde',grupo:'5jun',desc:'Recompra USD 1.350',      tipo:'eg',plan:1917000,realAmt:0,done:false,skip:false},
+  {id:'t14',fecha:'10 jun',grupo:'10jun', desc:'Cobro cheque Amaranto (1/3)',tipo:'ing',plan:743000, realAmt:0,done:false,skip:false},
+  {id:'t15',fecha:'10 jun',grupo:'10jun', desc:'Cobro cheque Rivero (1/3)',  tipo:'ing',plan:1490000,realAmt:0,done:false,skip:false},
+  {id:'t16',fecha:'10 jun',grupo:'10jun', desc:'Cobro ingreso extra $500k',  tipo:'ing',plan:500000, realAmt:0,done:false,skip:false},
+  {id:'t17',fecha:'10 jun',grupo:'10jun', desc:'Sueldo Verónica Olguín',     tipo:'eg',plan:951800, realAmt:0,done:false,skip:false},
+  {id:'t18',fecha:'10 jun',grupo:'10jun', desc:'Expensas Lares de Canning',  tipo:'eg',plan:424000, realAmt:0,done:false,skip:false},
+  {id:'t19',fecha:'10 jun',grupo:'10jun', desc:'Fútbol Ramiro + Gym',        tipo:'eg',plan:245000, realAmt:0,done:false,skip:false},
+  {id:'t20',fecha:'20 jun',grupo:'late',  desc:'Cobro cheque Amaranto (2/3)',tipo:'ing',plan:743000, realAmt:0,done:false,skip:false},
+  {id:'t21',fecha:'20 jun',grupo:'late',  desc:'Cobro cheque Rivero (2/3)', tipo:'ing',plan:1490000,realAmt:0,done:false,skip:false},
+  {id:'t22',fecha:'TBD',   grupo:'late',  desc:'Ingreso extra $700k',        tipo:'ing',plan:700000, realAmt:0,done:false,skip:false},
+  {id:'t23',fecha:'29 jun',grupo:'late',  desc:'Cobro cheque Rivero (3/3)', tipo:'ing',plan:1481236,realAmt:0,done:false,skip:false},
+  {id:'t24',fecha:'30 jun',grupo:'late',  desc:'Cobro cheque Amaranto (3/3)',tipo:'ing',plan:741000, realAmt:0,done:false,skip:false}
+];
+
+var compareChartInst=null;
+
+function trToggle(id){
+  var item=TR_ITEMS.find(function(x){return x.id===id;});
+  if(!item) return;
+  if(!item.done&&!item.skip){
+    var input=document.getElementById('tr-real-'+id);
+    var val=input?parseFloat(input.value):NaN;
+    item.realAmt=isNaN(val)||val<0?item.plan:val;
+    item.done=true;item.skip=false;
+  } else if(item.done){item.done=false;item.skip=false;item.realAmt=0;}
+  renderTracking();
+  saveState();
+  if(document.getElementById('tab-tracking').classList.contains('on')) setTimeout(renderCompareChart,50);
+}
+function trSkip(id){
+  var item=TR_ITEMS.find(function(x){return x.id===id;});
+  if(!item) return;
+  item.done=false;item.skip=!item.skip;if(item.skip) item.realAmt=0;
+  renderTracking();
+  saveState();
+  if(document.getElementById('tab-tracking').classList.contains('on')) setTimeout(renderCompareChart,50);
+}
+
+function buildTrItem(item){
+  var chkClass=item.done?'done':(item.skip?'skip':'');
+  var chkIcon=item.done?'✓':(item.skip?'⚠':'');
+  var nameClass=item.done?'done-text':'';
+  var amtClass=item.done?'done-amt':(item.tipo==='ing'?'ing':'eg');
+  var sign=item.tipo==='ing'?'+':'−';
+  var realDisplay=item.done?(' <span style="font-size:10px;color:var(--text3)">real:'+fmt(item.realAmt)+'</span>'):('');
+  var dev=item.done?(item.realAmt-item.plan):0;
+  var devStr=item.done?(' <span style="font-size:10px;color:'+(dev===0?'var(--text3)':dev>0?'var(--green)':'var(--red)')+'">'+(dev>=0?'+':'')+fmt(dev)+'</span>'):'';
+  var inputHtml=(!item.done&&!item.skip)?('<input type="number" id="tr-real-'+item.id+'" placeholder="monto real" value="'+item.plan+'" style="font-size:11px;height:30px;padding:0 8px;border:1px solid var(--border2);border-radius:6px;background:var(--bg2);color:var(--text0);width:120px">'):('');
+  return '<div class="tr-item"><div class="tr-check '+chkClass+'" onclick="trToggle(\''+item.id+'\')">'+chkIcon+'</div><div style="min-width:0"><div class="tr-name '+nameClass+'">'+item.desc+realDisplay+devStr+'</div><div class="tr-date">'+item.fecha+'</div></div>'+inputHtml+'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="tr-amount '+amtClass+'">'+sign+fmt(item.plan)+'</span>'+(!item.done?'<button class="tr-btn" onclick="trSkip(\''+item.id+'\')">'+(item.skip?'▶ incluir':'⏸ omitir')+'</button>':'')+' </div></div>';
+}
+
+function renderTracking(){
+  var groups={'pre':[],'5jun':[],'10jun':[],'late':[]};
+  TR_ITEMS.forEach(function(item){groups[item.grupo]&&groups[item.grupo].push(item);});
+  ['pre','5jun','10jun','late'].forEach(function(g){
+    var el=document.getElementById('tr-list-'+g);
+    if(el) el.innerHTML=groups[g].map(buildTrItem).join('');
+  });
+  var ingOk=0,egOk=0,planNet=0,realNet=0,done=0;
+  TR_ITEMS.forEach(function(item){
+    if(!item.skip) planNet+=(item.tipo==='ing'?item.plan:-item.plan);
+    if(item.done){done++;var rn=(item.tipo==='ing'?item.realAmt:-item.realAmt);realNet+=rn;if(item.tipo==='ing')ingOk+=item.realAmt;else egOk+=item.realAmt;}
+  });
+  var pct=Math.round(done/TR_ITEMS.length*100);
+  document.getElementById('tr-ing-ok').textContent='+'+fmt(ingOk);
+  document.getElementById('tr-eg-ok').textContent='−'+fmt(egOk);
+  var rs=document.getElementById('tr-saldo-real');rs.textContent=(realNet>=0?'+':'')+fmt(realNet);rs.style.color=realNet>=0?'var(--green)':'var(--red)';
+  var dv=document.getElementById('tr-desvio');var dev2=realNet-planNet;dv.textContent=(dev2>=0?'+':'')+fmt(dev2);dv.style.color=dev2===0?'var(--text3)':(dev2>0?'var(--green)':'var(--red)');
+  document.getElementById('tr-prog').style.width=pct+'%';
+  document.getElementById('tr-prog').style.background=pct===100?'var(--green)':pct>50?'var(--blue)':'var(--amber)';
+  document.getElementById('tr-prog-lbl').textContent=done+' de '+TR_ITEMS.length+' ítems completados';
+  document.getElementById('tr-prog-pct').textContent=pct+'%';
+  // compare table
+  var rows=TR_ITEMS.filter(function(i){return !i.skip;}).map(function(item){
+    var pv=(item.tipo==='ing'?item.plan:-item.plan);
+    var rv=item.done?(item.tipo==='ing'?item.realAmt:-item.realAmt):null;
+    var d=rv!==null?(rv-pv):null;
+    var dc=d===null?'dev-zero':(d===0?'dev-zero':(d>0?'dev-pos':'dev-neg'));
+    var s=item.tipo==='ing'?'+':'−';
+    return '<div class="compare-row"><span style="color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">'+item.desc+'</span><span style="text-align:right;color:'+(item.tipo==='ing'?'var(--green)':'var(--red)')+'">'+s+fmt(item.plan)+'</span><span style="text-align:right;color:'+(rv!==null?(item.tipo==='ing'?'var(--green)':'var(--red)'):'var(--text3)')+'">'+  (rv!==null?s+fmt(Math.abs(rv)):'—')+'</span><span style="text-align:right" class="'+dc+'">'+(d!==null?(d>=0?'+':'')+fmt(d):'—')+'</span></div>';
+  }).join('');
+  document.getElementById('tr-compare-rows').innerHTML=rows;
+  var pf=document.getElementById('cmp-plan-total'),rf=document.getElementById('cmp-real-total'),df=document.getElementById('cmp-dev-total');
+  pf.textContent=(planNet>=0?'+':'')+fmt(planNet);pf.style.color=planNet>=0?'var(--green)':'var(--red)';
+  rf.textContent=(realNet>=0?'+':'')+fmt(realNet);rf.style.color=realNet>=0?'var(--green)':'var(--red)';
+  df.textContent=(dev2>=0?'+':'')+fmt(dev2);df.className=dev2===0?'dev-zero':(dev2>0?'dev-pos':'dev-neg');
+}
+
+function renderCompareChart(){
+  var labels=[],planS=[],realS=[],planA=0,realA=0;
+  TR_ITEMS.forEach(function(item){
+    if(item.skip) return;
+    planA+=(item.tipo==='ing'?item.plan:-item.plan);
+    labels.push(item.desc.substring(0,16)+(item.desc.length>16?'…':''));
+    planS.push(Math.round(planA));
+    if(item.done){realA+=(item.tipo==='ing'?item.realAmt:-item.realAmt);realS.push(Math.round(realA));}
+    else realS.push(null);
+  });
+  if(compareChartInst) compareChartInst.destroy();
+  compareChartInst=new Chart(document.getElementById('compareChart'),{
+    type:'line',
+    data:{labels:labels,datasets:[{label:'Plan',data:planS,borderColor:'rgba(96,165,250,0.7)',borderDash:[5,4],pointRadius:3,tension:0.3,fill:false},{label:'Real',data:realS,borderColor:'rgba(74,222,128,0.9)',backgroundColor:'rgba(74,222,128,0.06)',pointRadius:5,tension:0.3,fill:true,spanGaps:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},maxRotation:50,autoSkip:true,maxTicksLimit:10},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{callback:function(v){return fmtK(v);},font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+}
+
+// ====================================================
+// REGISTRO
+// ====================================================
+var iList=[],eList=[];
+function addItem(type){
+  var desc=document.getElementById(type+'-desc').value.trim();
+  var cat=document.getElementById(type+'-cat').value;
+  var monto=parseFloat(document.getElementById(type+'-monto').value);
+  if(!desc||isNaN(monto)||monto<=0) return;
+  var id=Date.now();
+  if(type==='i'){iList.push({desc:desc,cat:cat,monto:monto,id:id});extraItems.push({d:'manual',desc:desc+' ('+cat+')',tipo:'ing',monto});}
+  else{eList.push({desc:desc,cat:cat,monto:monto,id:id});extraItems.push({d:'manual',desc:desc+' ('+cat+')',tipo:'eg',monto});}
+  document.getElementById(type+'-desc').value='';
+  document.getElementById(type+'-monto').value='';
+  renderLists();updateBal();saveState();
+}
+function delItem(type,id){
+  if(type==='i') iList=iList.filter(function(x){return x.id!==id;});
+  else eList=eList.filter(function(x){return x.id!==id;});
+  extraItems=[];
+  iList.forEach(function(x){extraItems.push({d:'manual',desc:x.desc,tipo:'ing',monto:x.monto});});
+  eList.forEach(function(x){extraItems.push({d:'manual',desc:x.desc,tipo:'eg',monto:x.monto});});
+  renderLists();updateBal();saveState();
+}
+function renderLists(){
+  document.getElementById('i-list').innerHTML=iList.map(function(x){return '<div class="er"><span>'+x.desc+' <span class="bdg bi">'+x.cat+'</span></span><span style="display:flex;align-items:center;gap:8px"><span style="color:var(--green);font-weight:600">+'+fmt(x.monto)+'</span><button class="dbt" onclick="delItem(\'i\','+x.id+')">✕</button></span></div>';}).join('');
+  document.getElementById('e-list').innerHTML=eList.map(function(x){return '<div class="er"><span>'+x.desc+' <span class="bdg bn">'+x.cat+'</span></span><span style="display:flex;align-items:center;gap:8px"><span style="color:var(--red);font-weight:600">−'+fmt(x.monto)+'</span><button class="dbt" onclick="delItem(\'e\','+x.id+')">✕</button></span></div>';}).join('');
+}
+function updateBal(){
+  var ti=iList.reduce(function(a,x){return a+x.monto;},0);
+  var te=eList.reduce(function(a,x){return a+x.monto;},0);
+  var neto=313194+ti-te;
+  document.getElementById('tot-i-extra').textContent=ti>0?'+'+fmt(ti):'+$0';
+  document.getElementById('tot-e-extra').textContent=te>0?'−'+fmt(te):'−$0';
+  var el=document.getElementById('bal-neto');
+  el.textContent=(neto>=0?'+':'')+fmt(neto)+' est.';
+  el.style.color=neto>=0?'var(--green)':'var(--red)';
+  // Update impacto card in registro
+  updateImpactoCard(ti, te, neto);
+}
+
+function updateImpactoCard(ti, te, neto){
+  var box = document.getElementById('estrategia-impacto');
+  if(!box) return;
+  if(ti===0 && te===0){ box.style.display='none'; return; }
+  box.style.display='block';
+  var lbl = document.getElementById('last-update-lbl');
+  var now = new Date();
+  if(lbl) lbl.textContent = 'actualizado ' + now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  // Build quick impact summary
+  var BASE_ING = 15533994;
+  var BASE_TARJETAS = 13319663;
+  var BASE_FIJOS = 2200800;
+  var totalIng = BASE_ING + ti;
+  var totalEg = BASE_TARJETAS + BASE_FIJOS + te;
+  var disponible5jun = 2645758 + ti; // salario + nuevos ingresos registrados
+  var gap = BASE_TARJETAS - disponible5jun - 5318451; // tarjetas - (salario+extras) - fondos
+  var html = '';
+  // Rows
+  html += '<div class="row"><span class="rl">ingresos totales ajustados</span><span class="rv pos">'+fmt(totalIng)+'</span></div>';
+  html += '<div class="row"><span class="rl">disponible antes de comisiones</span><span class="rv '+(disponible5jun>8000000?'pos':'warn')+'">'+fmt(disponible5jun + 5318451)+'</span></div>';
+  var newGap = BASE_TARJETAS - (disponible5jun + 5318451);
+  if(newGap > 0){
+    html += '<div class="row"><span class="rl">brecha a cubrir con USD/fondos</span><span class="rv neg">'+fmt(newGap)+'</span></div>';
+    var usdNeeded = Math.ceil(newGap / 1420);
+    html += '<div class="row"><span class="rl">USD necesarios para cubrir brecha</span><span class="rv warn">USD '+usdNeeded.toLocaleString('es-AR')+'</span></div>';
+  } else {
+    html += '<div class="row"><span class="rl">brecha cubierta — sin necesidad de vender USD</span><span class="rv pos">✓ superávit '+fmt(Math.abs(newGap))+'</span></div>';
+  }
+  html += '<div class="sep"></div>';
+  html += '<div class="row"><span class="rl" style="font-weight:600;font-family:var(--font-head)">resultado neto del mes</span><span class="rv '+(neto>=0?'pos':'neg')+'" style="font-size:15px;font-family:var(--font-head)">'+(neto>=0?'+':'')+fmt(neto)+'</span></div>';
+  if(te > 0){
+    html += '<div style="margin-top:8px;padding:8px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--r);font-size:12px;color:var(--amber)">⚠ Registraste gastos extra por '+fmt(te)+'. Esto reduce el excedente disponible para el próximo mes.</div>';
+  }
+  if(ti > 0){
+    html += '<div style="margin-top:8px;padding:8px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:var(--r);font-size:12px;color:var(--green)">✓ Registraste ingresos extra por '+fmt(ti)+'. Mejora la liquidez disponible para pagar tarjetas.</div>';
+  }
+  document.getElementById('estrategia-recalc-content').innerHTML = html;
+}
+
+function recalcEstrategia(){
+  var ti=iList.reduce(function(a,x){return a+x.monto;},0);
+  var te=eList.reduce(function(a,x){return a+x.monto;},0);
+  var neto=313194+ti-te;
+
+  // Base numbers
+  var SALARIO = 2645758;
+  var FIMA_TOTAL = 5318451; // FIMA Galicia + Santander
+  var COMISIONES = 5000000;
+  var TARJETAS_CARAS = 5974969;  // Visa Galicia + Amex Galicia + Cencosud
+  var TARJETAS_RESTO = 3903028;  // Visa Santander + Visa BBVA + Visa Macro
+  var MASTER_BBVA = 3681955;
+  var USD_TC = 1420;
+  var FIJOS = 1620800; // sueldo + expensas + deporte
+  var CHEQUES_10 = 2233000;
+  var EXTRA_10 = 500000;
+  var CHEQUES_20 = 2233000;
+  var EXTRA_TBD = 700000;
+  var CHEQUES_LATE = 2222236;
+
+  // Adjust with manual entries
+  // Extra ingresos: add to available pool
+  // Extra egresos: reduce from surpluses
+  var extraIng = ti;
+  var extraEg = te;
+
+  var disponible_hoy = SALARIO + FIMA_TOTAL + extraIng;
+  var tras_caras = disponible_hoy - TARJETAS_CARAS;
+  var gap_resto = TARJETAS_RESTO - tras_caras;
+  var usdNecesarios = gap_resto > 0 ? Math.ceil(gap_resto / USD_TC) : 0;
+  var tras_todos = tras_caras - TARJETAS_RESTO + (usdNecesarios > 0 ? usdNecesarios * USD_TC : 0);
+  var tras_comisiones = tras_todos + COMISIONES - MASTER_BBVA - (usdNecesarios > 0 ? usdNecesarios * USD_TC : 0);
+  var tras_10jun = tras_comisiones + CHEQUES_10 + EXTRA_10 - FIJOS - extraEg;
+  var tras_20jun = tras_10jun + CHEQUES_20 + EXTRA_TBD;
+  var saldo_fin_mes = tras_20jun + CHEQUES_LATE;
+
+  var steps = [];
+
+  // Step 1
+  steps.push({
+    num:'1', tipo:'red',
+    fecha:'5 jun — AHORA (rescatar fondos)',
+    titulo:'rescatar FIMA Galicia + Santander',
+    cuerpo:'FIMA Galicia $3.973.996 + Santander $1.344.455 + salario $2.645.758'+(extraIng>0?' + ingresos extra registrados '+fmt(extraIng):'')+' = <strong>'+fmt(disponible_hoy)+'</strong> disponibles.',
+    tags:['rescatar T+0','disponible: '+fmt(disponible_hoy)]
+  });
+
+  // Step 2
+  steps.push({
+    num:'2', tipo:'red',
+    fecha:'5 jun — antes de las 21:59hs',
+    titulo:'pagar tarjetas de mayor tasa (85-86% TNA)',
+    cuerpo:'Visa Galicia $2.766.499 + Amex Galicia $1.686.409 + Cencosud $1.522.061 = <strong>'+fmt(TARJETAS_CARAS)+'</strong><br>Saldo libre después: <strong>'+fmt(tras_caras)+'</strong>',
+    tags:['−'+fmt(TARJETAS_CARAS), tras_caras>=0?'libre: '+fmt(tras_caras):'déficit: '+fmt(Math.abs(tras_caras))]
+  });
+
+  // Step 3
+  if(usdNecesarios > 0){
+    steps.push({
+      num:'3', tipo:'warn',
+      fecha:'5 jun — mismo momento',
+      titulo:'pagar resto tarjetas + vender USD '+usdNecesarios+' como puente',
+      cuerpo:'Visa Santander $1.125.899 + Visa BBVA $2.249.206 + Visa Macro $527.923 = '+fmt(TARJETAS_RESTO)+'<br>Déficit: '+fmt(gap_resto)+' → vender <strong>USD '+usdNecesarios+'</strong> (≈ '+fmt(usdNecesarios*USD_TC)+' al TC $'+USD_TC+'). Recomprás los USD cuando lleguen las comisiones.',
+      tags:['−'+fmt(TARJETAS_RESTO),'vender USD '+usdNecesarios+' como puente']
+    });
+  } else {
+    steps.push({
+      num:'3', tipo:'done',
+      fecha:'5 jun — mismo momento',
+      titulo:'pagar resto tarjetas — sin necesidad de vender USD ✓',
+      cuerpo:'Visa Santander $1.125.899 + Visa BBVA $2.249.206 + Visa Macro $527.923 = '+fmt(TARJETAS_RESTO)+'<br>Con tus ingresos extra registrados alcanza sin tocar el fondo USD. Saldo libre: <strong>'+fmt(tras_caras - TARJETAS_RESTO)+'</strong>',
+      tags:['−'+fmt(TARJETAS_RESTO),'sin venta de USD ✓']
+    });
+  }
+
+  // Step 4
+  steps.push({
+    num:'4', tipo:'warn',
+    fecha:'5 jun — tarde (comisiones ~$5M)',
+    titulo:'pagar Master BBVA + recomprar USD'+(usdNecesarios>0?' '+usdNecesarios:''),
+    cuerpo:'Con comisiones $5.000.000: pagar Master BBVA <strong>'+fmt(MASTER_BBVA)+'</strong>'+(usdNecesarios>0?' + recompra USD '+usdNecesarios+' ('+fmt(usdNecesarios*USD_TC)+')':'')+'. Sobrante: <strong>'+fmt(tras_comisiones)+'</strong> → al FIMA Galicia.',
+    tags:['−'+fmt(MASTER_BBVA), tras_comisiones>0?'sobrante al FIMA: '+fmt(tras_comisiones):'cubrir con fondos']
+  });
+
+  // Step 5
+  steps.push({
+    num:'5', tipo:'info',
+    fecha:'10 jun — cobros $2.733.000',
+    titulo:'pagar gastos fijos del mes'+(extraEg>0?' + gastos extra registrados':''),
+    cuerpo:'Cheques '+fmt(CHEQUES_10)+' + extra '+fmt(EXTRA_10)+' = '+fmt(CHEQUES_10+EXTRA_10)+'<br>Gastos fijos: '+fmt(FIJOS)+(extraEg>0?' + gastos extra: '+fmt(extraEg):'')+'<br>Sobrante: <strong>'+fmt(tras_10jun)+'</strong> → al FIMA.',
+    tags:[tras_10jun>0?'sobrante '+fmt(tras_10jun)+' al FIMA':'déficit '+fmt(Math.abs(tras_10jun))]
+  });
+
+  // Step 6
+  steps.push({
+    num:'6', tipo:'info',
+    fecha:'20 jun — cobros $2.933.000',
+    titulo:'acumular para julio',
+    cuerpo:'Cheques '+fmt(CHEQUES_20)+' + extra '+fmt(EXTRA_TBD)+'. Saldo acumulado: <strong>'+fmt(tras_20jun)+'</strong> → dejar en FIMA.',
+    tags:['acumular para cierre julio']
+  });
+
+  // Step 7
+  steps.push({
+    num:'7', tipo:'info',
+    fecha:'29-30 jun — últimos cheques',
+    titulo:'saldo final del mes',
+    cuerpo:'Cheques '+fmt(CHEQUES_LATE)+'. Saldo total fin de mes: <strong>'+fmt(saldo_fin_mes)+'</strong>. Dejar en FIMA hasta vencimiento julio (13/7) para ganar ~$42.000 más.',
+    tags:['saldo fin mes: '+fmt(saldo_fin_mes)]
+  });
+
+  var numColors = {red:'var(--red)',warn:'var(--amber)',done:'var(--green)',info:'var(--blue)'};
+  var bgColors = {red:'var(--red-bg)',warn:'var(--amber-bg)',done:'var(--green-bg)',info:'var(--blue-bg)'};
+  var bdgClass = {red:'bd',warn:'bw',done:'bg2',info:'bi'};
+
+  var stepsHtml = steps.map(function(s){
+    var c = numColors[s.tipo]||'var(--blue)';
+    var bg = bgColors[s.tipo]||'var(--blue-bg)';
+    var tags = s.tags.map(function(t){return '<span class="bdg '+bdgClass[s.tipo]+'">'+t+'</span>';}).join(' ');
+    return '<div class="step"><div class="snum" style="background:'+bg+';color:'+c+';border:1px solid '+c+'40">'+s.num+'</div><div style="flex:1"><div class="step-date">'+s.fecha+'</div><div class="step-title">'+s.titulo+'</div><div class="step-body">'+s.cuerpo+'</div><div class="tag-grp" style="margin-top:6px">'+tags+'</div></div></div>';
+  }).join('');
+
+  var summaryHtml = '<div class="row"><span class="rl">disponible hoy (fondos + salario + extras)</span><span class="rv pos">'+fmt(disponible_hoy)+'</span></div>'+
+    '<div class="row"><span class="rl">total tarjetas a pagar</span><span class="rv neg">−$13.319.663</span></div>'+
+    (usdNecesarios>0?'<div class="row"><span class="rl">USD a vender como puente</span><span class="rv warn">USD '+usdNecesarios+' ('+fmt(usdNecesarios*USD_TC)+')</span></div>':'<div class="row"><span class="rl" style="color:var(--green)">✓ no necesitás vender USD</span><span class="rv pos">cubierto</span></div>')+
+    '<div class="row"><span class="rl">saldo estimado fin de mes</span><span class="rv '+(saldo_fin_mes>=0?'pos':'neg')+'" style="font-size:16px;font-family:var(--font-head)">'+(saldo_fin_mes>=0?'+':'')+fmt(saldo_fin_mes)+'</span></div>';
+
+  // Show in estrategia tab
+  var section = document.getElementById('estrategia-recalc-section');
+  var stepsEl = document.getElementById('estrategia-recalc-steps');
+  var summaryEl = document.getElementById('estrategia-recalc-summary');
+  if(section) section.style.display='block';
+  if(stepsEl) stepsEl.innerHTML=stepsHtml;
+  if(summaryEl) summaryEl.innerHTML=summaryHtml;
+
+  // Update badge
+  var badge = document.getElementById('estrategia-status-badge');
+  if(badge){
+    var hasData = ti>0||te>0;
+    badge.textContent = hasData ? '⟳ recalculado con '+( ti>0&&te>0?'ingresos y gastos extras':ti>0?'ingresos extras':'gastos extras') : 'plan base — sin ajustes';
+    badge.className = 'bdg '+(hasData?'bg2':'bi');
+  }
+
+  // Switch to estrategia tab
+  document.querySelectorAll('.tc').forEach(function(t){t.classList.remove('on')});
+  document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('on')});
+  document.getElementById('tab-estrategia').classList.add('on');
+  document.querySelectorAll('.nav-tab').forEach(function(t){if(t.textContent.trim()==='Estrategia') t.classList.add('on');});
+
+  // Scroll to recalc section
+  setTimeout(function(){
+    var el = document.getElementById('estrategia-recalc-section');
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 150);
+}
+
+// ====================================================
+// HISTORICO
+// ====================================================
+var HIST_DATA=[
+  {mes:'Jun 2026',ing:15533994,eg:15220800,tarjetas:13319663,cats:{educacion:1202504,alimentos:1140415,deporte:853505,viajes:594218,salud:718789,indumentaria:652313,hogar:461700,combustible:233110,compras:923200,servicios:131313,suscripciones:73055,entretenimiento:6554}}
+];
+var histCatInst=null,histTarjInst=null,histBalInst=null;
+
+function renderHistorico(){
+  // month cards
+  var html=HIST_DATA.map(function(d){
+    var diff=d.ing-d.eg;
+    return '<div class="month-card on"><div class="month-card-title">'+d.mes+'</div><div class="month-card-val '+(diff>=0?'g':'r')+'" style="color:'+(diff>=0?'var(--green)':'var(--red)')+'">'+fmt(Math.abs(diff))+'</div><div class="month-card-sub">'+(diff>=0?'superávit':'déficit')+' · tarjetas: '+fmt(d.tarjetas)+'</div></div>';
+  }).join('');
+  html+='<div class="month-card" style="border-style:dashed;cursor:default"><div class="month-card-title" style="color:var(--text3)">Julio 2026</div><div style="font-size:24px;text-align:center;padding:8px;color:var(--text3)">+</div><div class="month-card-sub" style="text-align:center">subir resúmenes</div></div>';
+  document.getElementById('historico-cards').innerHTML=html;
+
+  // category evolution
+  if(histCatInst) histCatInst.destroy();
+  var catKeys=Object.keys(HIST_DATA[0].cats);
+  histCatInst=new Chart(document.getElementById('histCatChart'),{
+    type:'bar',
+    data:{labels:HIST_DATA.map(function(d){return d.mes;}),datasets:catKeys.map(function(cat){return {label:cat,data:HIST_DATA.map(function(d){return d.cats[cat]||0;}),backgroundColor:(CAT_COLORS[cat]||'#60a5fa')+'99',borderRadius:4};})},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},color:'#8a8680',usePointStyle:true}}},scales:{x:{stacked:true,grid:{color:'rgba(255,255,255,0.04)'}},y:{stacked:true,ticks:{callback:function(v){return fmtK(v);},font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+
+  // tarjetas evolution
+  if(histTarjInst) histTarjInst.destroy();
+  histTarjInst=new Chart(document.getElementById('histTarjetasChart'),{
+    type:'line',
+    data:{labels:HIST_DATA.map(function(d){return d.mes;}),datasets:[{label:'Saldo tarjetas',data:HIST_DATA.map(function(d){return d.tarjetas;}),borderColor:'var(--red)',backgroundColor:'rgba(248,113,113,0.1)',fill:true,tension:0.3,pointRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{callback:function(v){return fmtK(v);},font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+
+  // balance evolution
+  if(histBalInst) histBalInst.destroy();
+  histBalInst=new Chart(document.getElementById('histBalanceChart'),{
+    type:'bar',
+    data:{labels:HIST_DATA.map(function(d){return d.mes;}),datasets:[{label:'Ingresos',data:HIST_DATA.map(function(d){return d.ing;}),backgroundColor:'rgba(74,222,128,0.6)',borderRadius:6},{label:'Egresos',data:HIST_DATA.map(function(d){return d.eg;}),backgroundColor:'rgba(248,113,113,0.6)',borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8a8680',font:{size:11},usePointStyle:true}}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{callback:function(v){return fmtK(v);},font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+}
+
+// ====================================================
+// UPLOAD
+// ====================================================
+function handleUpload(input){
+  var files=Array.from(input.files);
+  if(!files.length) return;
+  var list=document.getElementById('upload-list');
+  var html='<div style="margin-top:8px"><div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:8px">✓ '+files.length+' archivo(s) cargado(s) — análisis disponible el próximo mes</div>';
+  files.forEach(function(f){html+='<div style="font-size:12px;color:var(--text2);padding:4px 0;border-bottom:1px solid var(--border)">📄 '+f.name+'</div>';});
+  html+='</div>';
+  if(list) list.innerHTML=html;
+  // Add month pill
+  var mp=document.querySelector('.month-selector');
+  if(mp&&!document.querySelector('[data-m="7"].uploaded')){
+    var btn=document.querySelector('[data-m="7"]');
+    if(btn){btn.textContent='JUL ✓';btn.setAttribute('data-uploaded','1');btn.style.borderColor='var(--green)';btn.style.color='var(--green)';}
+  }
+  alert('📊 Resúmenes cargados. En la próxima versión del dashboard, julio 2026 estará disponible con el mismo análisis completo para comparar.');
+}
+
+// ====================================================
+// EXPORT EXCEL
+// ====================================================
+function exportExcel(){
+  var wb=XLSX.utils.book_new();
+  var res=[
+    ['DASHBOARD FINANCIERO — MARIO PISTONE','','JUNIO 2026'],
+    [],['INGRESOS','Monto'],
+    ['Salario','$2.645.758'],['Comisiones mayo','~$5.000.000'],
+    ['Cheque Amaranto 1/3','$743.000'],['Cheque Rivero 1/3','$1.490.000'],
+    ['Cheque Amaranto 2/3','$743.000'],['Cheque Rivero 2/3','$1.490.000'],
+    ['Cheque Amaranto 3/3','$741.000'],['Cheque Rivero 3/3','$1.481.236'],
+    ['Extra 10/6','$500.000'],['Extra adicional','$700.000'],
+    ['TOTAL','$15.533.994'],
+    [],['TARJETAS','Banco','Saldo','Pago mín.','TNA','Vence','Titular'],
+    ['Visa Galicia Signature','Galicia','$2.766.499','$626.400','85.65%','5/6','Mario'],
+    ['Amex Galicia Eminent','Galicia','$1.686.409','$228.420','85.65%','5/6','Mario'],
+    ['Cencosud Mastercard','Cencosud','$1.522.061','$531.070','86.49%','5/6','Alexandra'],
+    ['Visa Santander Black','Santander','$1.125.899','$555.120','81.80%','5/6','Mario'],
+    ['Visa BBVA Signature','BBVA','$2.249.206','$212.750','72.35%','5/6','Mario'],
+    ['Master BBVA Black','BBVA','$3.681.955','$305.607','72.35%','5/6','Alexandra'],
+    ['Visa Macro Signature','Macro','$527.923','$88.638','72.30%','5/6','Mario'],
+    ['Amex Santander (favor)','Santander','+$240.289','$0','—','8/6','Mario'],
+    ['NETO A PAGAR','','$13.319.663','','','',''],
+    [],['GASTOS FIJOS','Monto'],
+    ['Sueldo Verónica','$951.800'],['Expensas','$424.000'],
+    ['Fútbol Ramiro','$105.000'],['Gym x2','$120.000'],
+    ['Odontólogo (pagado)','$600.000'],['TOTAL','$2.200.800'],
+    [],['FONDOS','Monto','Renta'],
+    ['Fondo Santander $','$1.344.455','~6%/mes'],
+    ['FIMA Galicia $','$1.973.996','~6%/mes'],
+    ['FIMA Galicia USD','USD 8.623','reserva'],
+    ['Amex Santander acreedor','$240.289','']
+  ];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(res),'Resumen Jun 2026');
+
+  // Cashflow sheet
+  var cf=[['CASHFLOW DETALLADO — JUNIO 2026 (RECALCULADO)'],['Fecha','Concepto','Ingreso','Egreso','Saldo acum.','Fuente']];
+  var ac=0;
+  BASE_CF.concat(extraItems).forEach(function(r){
+    ac+=(r.tipo==='ing'?r.monto:-r.monto);
+    cf.push([r.d,r.desc,r.tipo==='ing'?r.monto:'',r.tipo==='eg'?r.monto:'',ac,r.fuente]);
+  });
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(cf),'CashFlow Junio');
+
+  // Gastos sheet
+  var gs=[['GASTOS POR CATEGORÍA — MAYO 2026'],['Titular','Categoría','Descripción','Monto','Vital']];
+  GASTOS_MARIO.forEach(function(g){gs.push(['Mario',g.cat,g.desc,g.monto,g.vital?'Si':'No']);});
+  GASTOS_ALEX.forEach(function(g){gs.push(['Alexandra',g.cat,g.desc,g.monto,g.vital?'Si':'No']);});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(gs),'Gastos Detallados');
+
+  // Tracking sheet
+  var tr=[['SEGUIMIENTO PLAN VS REAL'],['ID','Fecha','Desc','Tipo','Plan','Real','Desvío','Estado']];
+  TR_ITEMS.forEach(function(i){tr.push([i.id,i.fecha,i.desc,i.tipo,i.plan,i.done?i.realAmt:'pendiente',i.done?(i.realAmt-i.plan):'—',i.done?'✓ completado':i.skip?'⏸ omitido':'pendiente']);});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(tr),'Seguimiento');
+
+  XLSX.writeFile(wb,'Pistone_Finanzas_Junio2026.xlsx');
+}
+
+// ====================================================
+// SCROLL REVEAL
+// ====================================================
+var observer=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting) e.target.classList.add('visible');});},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(function(el){observer.observe(el);});
+
+// ====================================================
+// PERSISTENCIA — localStorage (loadState + clearState)
+// ====================================================
+
+function loadState(){
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if(!raw) return false;
+    var state = JSON.parse(raw);
+
+    // Restore iList / eList
+    if(state.iList && Array.isArray(state.iList)) iList = state.iList;
+    if(state.eList && Array.isArray(state.eList)) eList = state.eList;
+
+    // Rebuild extraItems from iList + eList
+    extraItems = [];
+    iList.forEach(function(x){ extraItems.push({d:'manual',desc:x.desc+' ('+x.cat+')',tipo:'ing',monto:x.monto}); });
+    eList.forEach(function(x){ extraItems.push({d:'manual',desc:x.desc+' ('+x.cat+')',tipo:'eg',monto:x.monto}); });
+
+    // Restore TR_ITEMS state (only done/skip/realAmt — keep base data)
+    if(state.trItems && Array.isArray(state.trItems)){
+      state.trItems.forEach(function(saved){
+        var item = TR_ITEMS.find(function(x){ return x.id === saved.id; });
+        if(item){
+          item.done = saved.done;
+          item.skip = saved.skip;
+          item.realAmt = saved.realAmt;
+        }
+      });
+    }
+
+    // Show last saved info
+    if(state.savedAt){
+      var d = new Date(state.savedAt);
+      var lbl = d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'}) + ' ' +
+                d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+      showSaveToast('datos restaurados — último guardado: ' + lbl, 4000);
+    }
+    return true;
+  } catch(e) {
+    console.warn('Error cargando estado:', e);
+    return false;
+  }
+}
+
+function clearState(){
+  if(!confirm('¿Seguro que querés borrar todos los datos guardados y empezar de cero?')) return;
+  try {
+    localStorage.removeItem(LS_KEY);
+    iList=[]; eList=[]; extraItems=[];
+    TR_ITEMS.forEach(function(item){
+      if(item.id !== 't01'){ // Keep odontólogo as done
+        item.done=false; item.skip=false; item.realAmt=0;
+      }
+    });
+    renderLists(); updateBal(); renderTracking();
+    showSaveToast('datos borrados — empezando de cero');
+  } catch(e) {}
+}
+
+// Toast notification
+// Auto-save indicator in topbar
+function addSaveControls(){
+  var right = document.querySelector('.topbar-right');
+  if(!right) return;
+
+  // Last saved label
+  var lbl = document.createElement('span');
+  lbl.id = 'save-lbl';
+  lbl.style.cssText = 'font-size:10px;color:var(--text3);white-space:nowrap;display:none';
+  right.insertBefore(lbl, right.firstChild);
+
+  // Clear button
+  var clearBtn = document.createElement('button');
+  clearBtn.className = 'tb-btn';
+  clearBtn.innerHTML = '🗑 limpiar';
+  clearBtn.onclick = clearState;
+  clearBtn.title = 'Borrar todos los datos guardados';
+  clearBtn.style.cssText = 'font-size:11px;color:var(--red);border-color:var(--red-border)';
+  right.insertBefore(clearBtn, right.children[right.children.length-1]);
+}
+
+// saveState is called directly inside each function — no patching needed
+
+// Update last-saved label periodically
+function updateSaveLbl(){
+  var lbl = document.getElementById('save-lbl');
+  if(!lbl) return;
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if(!raw){ lbl.style.display='none'; return; }
+    var state = JSON.parse(raw);
+    if(state.savedAt){
+      var d = new Date(state.savedAt);
+      var str = d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+      lbl.textContent = 'guardado ' + str;
+      lbl.style.display = 'block';
+    }
+  } catch(e){}
+}
+
+// Add clear-data button to registro tab
+function addClearBtnToRegistro(){
+  var el = document.getElementById('tab-registro');
+  if(!el) return;
+  var sec = document.createElement('div');
+  sec.style.cssText = 'margin-top:16px;padding-top:16px;border-top:1px solid var(--border)';
+  sec.innerHTML = '<div style="font-family:var(--font-head);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">gestión de datos</div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    + '<button class="tb-btn" onclick="saveState()" style="flex:1;justify-content:center;font-size:12px">💾 guardar ahora</button>'
+    + '<button class="tb-btn" onclick="clearState()" style="flex:1;justify-content:center;font-size:12px;color:var(--red);border-color:var(--red-border)">🗑 borrar todo</button>'
+    + '</div>'
+    + '<div style="margin-top:10px;font-size:11px;color:var(--text3);line-height:1.6">Los datos se guardan automáticamente en este navegador/dispositivo. Si abrís el archivo en otro dispositivo, los datos no se sincronizan.</div>';
+  el.appendChild(sec);
+}
+
+// ====================================================
+// INIT CON PERSISTENCIA
+// ====================================================
+addSaveControls();
+addClearBtnToRegistro();
+
+var restored = loadState();
+
+renderLists();
+updateBal();
+renderTracking();
+renderGastos();
+renderHistorico();
+
+if(!restored){
+  // First time: show welcome message
+  setTimeout(function(){
+    showSaveToast('primera vez — los datos se guardan automáticamente', 4000);
+  }, 1000);
+}
+
+setInterval(updateSaveLbl, 30000);
+updateSaveLbl();
+</script>
+</body>
+</html>
